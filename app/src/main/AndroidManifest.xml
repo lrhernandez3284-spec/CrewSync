@@ -13,7 +13,7 @@
         android:theme="@style/Theme.MyApplication">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".PinActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Register the detail screen here (inside application) -->
+        <activity android:name=".MainActivity" android:exported="false" />
         <activity android:name=".EventDetailActivity" />
 
     </application>
