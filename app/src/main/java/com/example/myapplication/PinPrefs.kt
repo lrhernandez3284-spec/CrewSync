@@ -5,21 +5,23 @@ import java.security.MessageDigest
 
 object PinPrefs {
     private const val PREFS_NAME = "crewsync_prefs"
-    private const val KEY_PIN_HASH = "pin_hash"
+    private const val KEY_PIN_HASH_PREFIX = "pin_hash_"
 
-    fun hasPin(context: Context): Boolean {
+    private fun keyForUser(userId: String): String = KEY_PIN_HASH_PREFIX + userId
+
+    fun hasPin(context: Context, userId: String): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.contains(KEY_PIN_HASH)
+        return prefs.contains(keyForUser(userId))
     }
 
-    fun savePin(context: Context, pin: String) {
+    fun savePin(context: Context, userId: String, pin: String) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(KEY_PIN_HASH, sha256(pin)).apply()
+        prefs.edit().putString(keyForUser(userId), sha256(pin)).apply()
     }
 
-    fun verifyPin(context: Context, pin: String): Boolean {
+    fun verifyPin(context: Context, userId: String, pin: String): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val stored = prefs.getString(KEY_PIN_HASH, null) ?: return false
+        val stored = prefs.getString(keyForUser(userId), null) ?: return false
         return stored == sha256(pin)
     }
 
@@ -29,3 +31,4 @@ object PinPrefs {
         return bytes.joinToString("") { "%02x".format(it) }
     }
 }
+

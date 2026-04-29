@@ -30,6 +30,7 @@ class EventAdapter(private val events: List<Event>) :
 
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, EventDetailActivity::class.java)
+	    intent.putExtra("eventId", e.id)
             intent.putExtra("title", e.title)
             intent.putExtra("dateTime", e.dateTime)
             intent.putExtra("category", e.category)
