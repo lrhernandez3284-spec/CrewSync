@@ -1,6 +1,7 @@
 package com.crewsync.crewsync
 
 import android.content.Intent
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,9 +13,6 @@ import com.crewsync.crewsync.db.TaskDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class EventAdapter(
     private val events: List<Event>,
@@ -24,6 +22,7 @@ class EventAdapter(
 
     class EventViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val vCategoryBar: View? = itemView.findViewById(R.id.vCategoryBar)
+        val vCategoryDot: View? = itemView.findViewById(R.id.vCategoryDot)
         val tvTitle: TextView = itemView.findViewById(R.id.tvEventTitle)
         val tvMeta: TextView = itemView.findViewById(R.id.tvEventMeta)
         val tvLocation: TextView = itemView.findViewById(R.id.tvEventLocation)
@@ -41,40 +40,42 @@ class EventAdapter(
         val e = events[position]
 
         holder.tvTitle.text = e.title
-
-        // If your Event has a millis field, use it; otherwise keep your current string
-        // (Your screenshot shows a formatted date, so keep it simple here.)
         holder.tvMeta.text = "${e.category} • ${e.dateTime}"
         holder.tvLocation.text = e.location ?: "No location"
 
-        // Category color bar (if you have CategoryColorStore already)
-        holder.vCategoryBar?.let {
-            val color = CategoryColorStore.getColor(holder.itemView.context, e.category)
-            it.setBackgroundColor(color)
-        }
+        val categoryColor = CategoryColorStore.getColor(holder.itemView.context, e.category)
+        holder.vCategoryBar?.setBackgroundColor(categoryColor)
+        holder.vCategoryDot?.setBackgroundColor(categoryColor)
 
-        // Default placeholders while we compute
-        holder.tvStatus.text = "Status: —"
-        holder.tvProgress.text = "Progress: —"
+        holder.tvStatus.text = "Status: loading..."
+        holder.tvProgress.text = "Progress: loading..."
 
-        // Compute counts off the main thread
         lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val total = dao.countTotalNow(e.id)
             val done = dao.countDoneNow(e.id)
-
             val percent = if (total == 0) 0 else (done * 100 / total)
 
-            // Simple status rule (matches what you described)
-            // NOTE: This assumes the event time is "upcoming/past" based on NOW.
-            // If you later store a real eventDateMillis, use that instead.
+            val now = System.currentTimeMillis()
+            val eventMillis = e.dateTimeMillis
+            val isPast = eventMillis != null && eventMillis < now
+
             val status = when {
                 total > 0 && done == total -> "Complete"
-                done > 0 -> "In Progress"
+                total > 0 && done > 0 -> "In Progress"
+                isPast -> "Past Due"
                 else -> "Upcoming"
+            }
+
+            val statusColor = when (status) {
+                "Complete" -> Color.rgb(34, 139, 34)
+                "In Progress" -> Color.rgb(204, 132, 0)
+                "Past Due" -> Color.rgb(180, 40, 40)
+                else -> Color.DKGRAY
             }
 
             withContext(Dispatchers.Main) {
                 holder.tvStatus.text = "Status: $status"
+                holder.tvStatus.setTextColor(statusColor)
                 holder.tvProgress.text = "Progress: $percent% ($done/$total)"
             }
         }

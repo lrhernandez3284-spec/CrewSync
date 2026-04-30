@@ -6,6 +6,6 @@ data class Event(
     val dateTime: String,
     val category: String,
     val location: String?,
-    val notesPreview: String?
+    val notesPreview: String?,
+    val dateTimeMillis: Long? = null
 )
-

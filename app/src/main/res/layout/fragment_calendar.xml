@@ -1,11 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <CalendarView
+    <LinearLayout
+        android:id="@+id/calendarRoot"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-</FrameLayout>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <TextView
+            android:id="@+id/tvCalendarTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Calendar"
+            android:textStyle="bold"
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/btnPrevMonth"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Previous" />
+
+            <Button
+                android:id="@+id/btnNextMonth"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Next" />
+        </LinearLayout>
+
+        <GridLayout
+            android:id="@+id/gridWeekHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="7"
+            android:layout_marginTop="12dp" />
+
+        <GridLayout
+            android:id="@+id/gridCalendar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="7"
+            android:layout_marginTop="6dp" />
+
+        <TextView
+            android:id="@+id/tvSelectedDay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selected day events"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="18dp" />
+
+        <LinearLayout
+            android:id="@+id/listSelectedEvents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+</ScrollView>

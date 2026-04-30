@@ -21,6 +21,7 @@ class DashboardFragment : Fragment() {
 
     private var suppressSpinnerCallback = false
     private lateinit var spUser: Spinner
+    private lateinit var rclEvents: RecyclerView
 
     private val switchUserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -35,6 +36,8 @@ class DashboardFragment : Fragment() {
                 suppressSpinnerCallback = true
                 spUser.setSelection(users.indexOf(user).takeIf { it >= 0 } ?: 0)
                 suppressSpinnerCallback = false
+
+                refreshEvents()
             } else {
                 val current = UserPrefs.getCurrentUserId(requireContext())
                 suppressSpinnerCallback = true
@@ -43,13 +46,32 @@ class DashboardFragment : Fragment() {
             }
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: android.os.Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: android.os.Bundle?
+    ): View {
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
         spUser = view.findViewById(R.id.spUser)
-        val rcl = view.findViewById<RecyclerView>(R.id.rclEvents)
+        rclEvents = view.findViewById(R.id.rclEvents)
 
-        // Setup users spinner
+        setupUserSpinner()
+
+        rclEvents.layoutManager = LinearLayoutManager(requireContext())
+        refreshEvents()
+
+        return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (this::rclEvents.isInitialized) {
+            refreshEvents()
+        }
+    }
+
+    private fun setupUserSpinner() {
         val users = UserStore.getUsers(requireContext())
         val userAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, users)
         userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -61,6 +83,7 @@ class DashboardFragment : Fragment() {
         spUser.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, v: View?, pos: Int, id: Long) {
                 if (suppressSpinnerCallback) return
+
                 val chosen = users[pos]
                 val cur = UserPrefs.getCurrentUserId(requireContext())
                 if (chosen == cur) return
@@ -70,14 +93,14 @@ class DashboardFragment : Fragment() {
                 i.putExtra(PinActivity.EXTRA_TARGET_USER, chosen)
                 switchUserLauncher.launch(i)
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+    }
 
-        // Events list
-        rcl.layoutManager = LinearLayoutManager(requireContext())
-        val dao = com.crewsync.crewsync.db.CrewSyncDatabase.getInstance(requireContext()).taskDao()
-        rcl.adapter = EventAdapter(EventRepository.getEvents(), dao, viewLifecycleOwner)
-
-        return view
+    private fun refreshEvents() {
+        val dao = CrewSyncDatabase.getInstance(requireContext()).taskDao()
+        val events = EventRepository.getEvents(requireContext())
+        rclEvents.adapter = EventAdapter(events, dao, viewLifecycleOwner)
     }
 }
