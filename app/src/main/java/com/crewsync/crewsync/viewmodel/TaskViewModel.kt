@@ -52,7 +52,9 @@ class TaskViewModel(private val dao: TaskDao) : ViewModel() {
 
     fun update(task: Task) = viewModelScope.launch { dao.update(task) }
 
-    fun deleteIfCreator(taskId: Int, userId: String) = viewModelScope.launch {
+    // NEW: deletes assignments first, then deletes task (manager allowed)
+    fun deleteTask(taskId: Int, userId: String) = viewModelScope.launch {
+        dao.deleteAssignmentsForTask(taskId)
         dao.deleteIfCreator(taskId, userId)
     }
 
@@ -72,9 +74,7 @@ class TaskViewModel(private val dao: TaskDao) : ViewModel() {
     }
 
     fun getAssignedUsers(taskId: Int, callback: (List<String>) -> Unit) {
-        viewModelScope.launch {
-            callback(dao.getAssignedUsers(taskId))
-        }
+        viewModelScope.launch { callback(dao.getAssignedUsers(taskId)) }
     }
 
     fun deleteAssignmentsForUser(userId: String) = viewModelScope.launch {

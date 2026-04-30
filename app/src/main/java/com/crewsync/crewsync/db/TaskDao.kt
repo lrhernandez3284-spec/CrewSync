@@ -17,8 +17,12 @@ interface TaskDao {
     @Update
     suspend fun update(task: Task)
 
-    // creator-only delete enforced in SQL:
-    @Query("DELETE FROM tasks WHERE taskId = :taskId AND createdByUserId = :userId")
+    // creator-only delete, BUT manager can delete all:
+    @Query("""
+        DELETE FROM tasks
+        WHERE taskId = :taskId
+          AND (createdByUserId = :userId OR :userId = 'manager')
+    """)
     suspend fun deleteIfCreator(taskId: Int, userId: String): Int
 
     @Query("""

@@ -1,13 +1,14 @@
 package com.crewsync.crewsync
 
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.*
-import android.graphics.Rect
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -18,7 +19,6 @@ import com.crewsync.crewsync.db.CrewSyncDatabase
 import com.crewsync.crewsync.db.Task
 import com.crewsync.crewsync.viewmodel.TaskViewModel
 import com.crewsync.crewsync.viewmodel.TaskViewModelFactory
-import android.view.View
 
 class EventDetailActivity : AppCompatActivity() {
 
@@ -47,11 +47,14 @@ class EventDetailActivity : AppCompatActivity() {
         val title = data.getStringExtra("title") ?: ""
         val category = data.getStringExtra("category") ?: "General"
         val dueMillis = data.getLongExtra("dueDateMillis", System.currentTimeMillis())
+        val assigned = data.getStringArrayListExtra("assignedUsers") ?: arrayListOf()
 
         if (title.isBlank()) {
             Toast.makeText(this, "Task title required", Toast.LENGTH_SHORT).show()
             return@registerForActivityResult
         }
+
+        val finalAssigned = if (assigned.isEmpty()) listOf(currentUserId) else assigned
 
         if (taskId == 0) {
             // ADD new task
@@ -65,7 +68,7 @@ class EventDetailActivity : AppCompatActivity() {
                 createdByUserId = currentUserId
             )
             viewModel.insertWithCallback(newTask) { newId ->
-                viewModel.setAssignments(newId, listOf(currentUserId))
+                viewModel.setAssignments(newId, finalAssigned)
                 ReminderScheduler.schedule(this, newId, newTask.title, newTask.dueDateMillis)
             }
         } else {
@@ -83,11 +86,10 @@ class EventDetailActivity : AppCompatActivity() {
                 createdByUserId = createdBy
             )
             viewModel.update(editedTask)
-
+            viewModel.setAssignments(editedTask.taskId, finalAssigned)
             ReminderScheduler.schedule(this, editedTask.taskId, editedTask.title, editedTask.dueDateMillis)
         }
     }
-
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {
@@ -127,39 +129,33 @@ class EventDetailActivity : AppCompatActivity() {
         val rclTasks = findViewById<RecyclerView>(R.id.rclTasks)
         rclTasks.layoutManager = LinearLayoutManager(this)
 
+        // ---- ViewModel init ----
+        val dao = CrewSyncDatabase.getInstance(this).taskDao()
+        val factory = TaskViewModelFactory(dao)
+        viewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
+
+        viewModel.setEventId(eventId)
+        viewModel.setUserId(currentUserId)
+
         taskAdapter = TaskAdapter(
             currentUserId = currentUserId,
-
             onToggleDone = { task, checked ->
-                Toast.makeText(this, "Toggle: ${task.title} -> $checked", Toast.LENGTH_SHORT).show()
                 viewModel.update(task.copy(isDone = checked))
             },
-
             onDelete = { task ->
-                Toast.makeText(this, "Delete pressed: ${task.title}", Toast.LENGTH_SHORT).show()
-                viewModel.deleteIfCreator(task.taskId, currentUserId)
+                viewModel.deleteTask(task.taskId, currentUserId)
                 ReminderScheduler.cancel(this, task.taskId)
             },
-
             onEdit = { task ->
-                Toast.makeText(this, "Edit pressed: ${task.title}", Toast.LENGTH_SHORT).show()
-                val i = Intent(this, TaskEditActivity::class.java)
-                i.putExtra("eventId", eventId)
-                i.putExtra("taskId", task.taskId)
-                i.putExtra("title", task.title)
-                i.putExtra("category", task.category)
-                i.putExtra("dueDateMillis", task.dueDateMillis)
-                i.putExtra("isDone", task.isDone)
-                i.putExtra("createdByUserId", task.createdByUserId)
-                taskEditLauncher.launch(i)
+                launchEditTask(task)
             }
         )
-
         rclTasks.adapter = taskAdapter
 
+        // Manual tap handler (checkbox/edit/delete)
         rclTasks.addOnItemTouchListener(object : SimpleOnItemTouchListener() {
-            override fun onInterceptTouchEvent(rv: RecyclerView, e: android.view.MotionEvent): Boolean {
-                if (e.action != android.view.MotionEvent.ACTION_UP) return false
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                if (e.action != MotionEvent.ACTION_UP) return false
 
                 val child = rv.findChildViewUnder(e.x, e.y) ?: return false
                 val position = rv.getChildAdapterPosition(child)
@@ -173,46 +169,25 @@ class EventDetailActivity : AppCompatActivity() {
                 val btnDelete = child.findViewById<Button>(R.id.btnDelete)
 
                 when {
-                    isTapInsideView(child, cb, childX, childY) -> {
-                        Toast.makeText(this@EventDetailActivity, "Manual checkbox tap", Toast.LENGTH_SHORT).show()
+                    isTapInsideView(cb, childX, childY) -> {
                         viewModel.update(task.copy(isDone = !task.isDone))
                         return true
                     }
 
-                    btnDelete.visibility == android.view.View.VISIBLE &&
-                            isTapInsideView(child, btnDelete, childX, childY) -> {
-                        Toast.makeText(this@EventDetailActivity, "Manual delete tap", Toast.LENGTH_SHORT).show()
-                        viewModel.deleteIfCreator(task.taskId, currentUserId)
+                    btnDelete.visibility == View.VISIBLE && isTapInsideView(btnDelete, childX, childY) -> {
+                        viewModel.deleteTask(task.taskId, currentUserId)
                         ReminderScheduler.cancel(this@EventDetailActivity, task.taskId)
                         return true
                     }
 
-                    isTapInsideView(child, btnEdit, childX, childY) -> {
-                        Toast.makeText(this@EventDetailActivity, "Manual edit tap", Toast.LENGTH_SHORT).show()
-                        val i = Intent(this@EventDetailActivity, TaskEditActivity::class.java)
-                        i.putExtra("eventId", eventId)
-                        i.putExtra("taskId", task.taskId)
-                        i.putExtra("title", task.title)
-                        i.putExtra("category", task.category)
-                        i.putExtra("dueDateMillis", task.dueDateMillis)
-                        i.putExtra("isDone", task.isDone)
-                        i.putExtra("createdByUserId", task.createdByUserId)
-                        taskEditLauncher.launch(i)
+                    isTapInsideView(btnEdit, childX, childY) -> {
+                        launchEditTask(task)
                         return true
                     }
                 }
-
                 return false
             }
         })
-
-        // ---- ViewModel init (Room demo style) ----
-        val dao = CrewSyncDatabase.getInstance(this).taskDao()
-        val factory = TaskViewModelFactory(dao)
-        viewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
-
-        viewModel.setEventId(eventId)
-        viewModel.setUserId(currentUserId)
 
         // observe tasks -> update list + progress + category list
         viewModel.tasks.observe(this) { tasks ->
@@ -226,6 +201,7 @@ class EventDetailActivity : AppCompatActivity() {
             val i = Intent(this, TaskEditActivity::class.java)
             i.putExtra("eventId", eventId)
             i.putExtra("taskId", 0)
+            // default assignedUsers empty -> we default to creator in result handler
             taskEditLauncher.launch(i)
         }
 
@@ -240,7 +216,7 @@ class EventDetailActivity : AppCompatActivity() {
 
         // category selection
         spCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, pos: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 currentCategory = parent?.getItemAtPosition(pos)?.toString() ?: "All"
                 viewModel.setCategory(currentCategory)
             }
@@ -248,8 +224,24 @@ class EventDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun launchEditTask(task: Task) {
+        viewModel.getAssignedUsers(task.taskId) { assigned ->
+            runOnUiThread {
+                val i = Intent(this, TaskEditActivity::class.java)
+                i.putExtra("eventId", eventId)
+                i.putExtra("taskId", task.taskId)
+                i.putExtra("title", task.title)
+                i.putExtra("category", task.category)
+                i.putExtra("dueDateMillis", task.dueDateMillis)
+                i.putExtra("isDone", task.isDone)
+                i.putExtra("createdByUserId", task.createdByUserId)
+                i.putStringArrayListExtra("assignedUsers", ArrayList(assigned))
+                taskEditLauncher.launch(i)
+            }
+        }
+    }
 
-    private fun isTapInsideView(parent: View, target: View, x: Float, y: Float): Boolean {
+    private fun isTapInsideView(target: View, x: Float, y: Float): Boolean {
         val rect = Rect()
         target.getHitRect(rect)
         return rect.contains(x.toInt(), y.toInt())

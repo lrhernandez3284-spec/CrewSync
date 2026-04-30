@@ -68,12 +68,16 @@ class UserManagerActivity : AppCompatActivity() {
                             Toast.makeText(this, "PIN reset for $userId", Toast.LENGTH_SHORT).show()
                         }
                         1 -> {
+                            // Remove user + PIN
                             UserStore.removeUser(this, userId)
                             PinPrefs.resetPin(this, userId)
+
+                            // PHASE D: remove dangling task assignments for that user
                             val dao = CrewSyncDatabase.getInstance(this).taskDao()
                             lifecycleScope.launch {
                                 dao.deleteAssignmentsForUser(userId)
                             }
+
                             Toast.makeText(this, "Deleted $userId", Toast.LENGTH_SHORT).show()
                             refresh()
                         }
@@ -84,4 +88,3 @@ class UserManagerActivity : AppCompatActivity() {
         }
     }
 }
-

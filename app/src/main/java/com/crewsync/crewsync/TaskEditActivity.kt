@@ -3,9 +3,7 @@ package com.crewsync.crewsync
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -25,14 +23,28 @@ class TaskEditActivity : AppCompatActivity() {
         val btnPickDue = findViewById<Button>(R.id.btnPickDue)
         val btnSave = findViewById<Button>(R.id.btnSaveTask)
 
+        val listUsers = findViewById<ListView>(R.id.listUsers)
+
         val eventId = intent.getIntExtra("eventId", -1)
         val taskId = intent.getIntExtra("taskId", 0)
 
-        // prefill if editing
+        // prefill
         etTitle.setText(intent.getStringExtra("title") ?: "")
         etCategory.setText(intent.getStringExtra("category") ?: "")
         dueMillis = intent.getLongExtra("dueDateMillis", System.currentTimeMillis())
         tvDue.text = "Due: ${formatDue(dueMillis)}"
+
+        // users multi-select
+        val users = UserStore.getUsers(this).filter { it != "manager" }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, users)
+        listUsers.adapter = adapter
+        listUsers.choiceMode = ListView.CHOICE_MODE_MULTIPLE
+
+        // preselect
+        val preselected = intent.getStringArrayListExtra("assignedUsers") ?: arrayListOf()
+        for (i in users.indices) {
+            if (preselected.contains(users[i])) listUsers.setItemChecked(i, true)
+        }
 
         btnPickDue.setOnClickListener {
             pickDateTime { picked ->
@@ -43,15 +55,25 @@ class TaskEditActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             val title = etTitle.text.toString().trim()
+            if (title.isBlank()) {
+                Toast.makeText(this, "Title required", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val category = etCategory.text.toString().trim().ifBlank { "General" }
 
-            // Send result back to EventDetailActivity
+            // collect assigned users
+            val chosen = mutableListOf<String>()
+            for (i in users.indices) {
+                if (listUsers.isItemChecked(i)) chosen.add(users[i])
+            }
+
             val result = android.content.Intent()
-	    result.putExtra("eventId", eventId)
-	    result.putExtra("taskId", taskId)
-	    result.putExtra("title", title)
-	    result.putExtra("category", category)
-	    result.putExtra("dueDateMillis", dueMillis)
+            result.putExtra("eventId", eventId)
+            result.putExtra("taskId", taskId)
+            result.putExtra("title", title)
+            result.putExtra("category", category)
+            result.putExtra("dueDateMillis", dueMillis)
+            result.putStringArrayListExtra("assignedUsers", ArrayList(chosen))
 
             setResult(RESULT_OK, result)
             finish()
@@ -89,4 +111,3 @@ class TaskEditActivity : AppCompatActivity() {
         return sdf.format(millis)
     }
 }
-
