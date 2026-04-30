@@ -30,5 +30,10 @@ object PinPrefs {
         val bytes = md.digest(text.toByteArray(Charsets.UTF_8))
         return bytes.joinToString("") { "%02x".format(it) }
     }
+
+    fun resetPin(context: Context, userId: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().remove(keyForUser(userId)).apply()
+    }
 }
 

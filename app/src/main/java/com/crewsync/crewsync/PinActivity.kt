@@ -16,7 +16,7 @@ class PinActivity : AppCompatActivity() {
         const val RESULT_USER = "result_user"
     }
 
-    private val users = listOf("luis", "mike", "guest")
+    private val users: List<String> by lazy { UserStore.getUsers(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

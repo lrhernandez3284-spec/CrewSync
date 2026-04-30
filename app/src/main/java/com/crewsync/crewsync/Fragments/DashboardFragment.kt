@@ -1,7 +1,6 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.Fragments
 
 import android.content.Intent
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,16 +9,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.crewsync.crewsync.EventAdapter
 import com.crewsync.crewsync.EventRepository
+import com.crewsync.crewsync.PinActivity
+import com.crewsync.crewsync.R
+import com.crewsync.crewsync.UserPrefs
+import com.crewsync.crewsync.UserStore
 
 class DashboardFragment : Fragment() {
 
-    private val users = listOf("luis", "mike", "guest")
     private var suppressSpinnerCallback = false
     private lateinit var spUser: Spinner
 
     private val switchUserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (!this::spUser.isInitialized) return@registerForActivityResult
+
+            val users = UserStore.getUsers(requireContext())
             if (result.resultCode == android.app.Activity.RESULT_OK) {
                 val user = result.data?.getStringExtra(PinActivity.RESULT_USER) ?: return@registerForActivityResult
                 UserPrefs.setCurrentUserId(requireContext(), user)
@@ -36,11 +42,14 @@ class DashboardFragment : Fragment() {
             }
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: android.os.Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
         spUser = view.findViewById(R.id.spUser)
+        val rcl = view.findViewById<RecyclerView>(R.id.rclEvents)
 
+        // Setup users spinner
+        val users = UserStore.getUsers(requireContext())
         val userAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, users)
         userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spUser.adapter = userAdapter
@@ -63,13 +72,10 @@ class DashboardFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        val rcl = view.findViewById<RecyclerView>(R.id.rclEvents)
+        // Events list
         rcl.layoutManager = LinearLayoutManager(requireContext())
-
-        val events = EventRepository.getEvents()
-        rcl.adapter = EventAdapter(events)
+        rcl.adapter = EventAdapter(EventRepository.getEvents())
 
         return view
     }
 }
-

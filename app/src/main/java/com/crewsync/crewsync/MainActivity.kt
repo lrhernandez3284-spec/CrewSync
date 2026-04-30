@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.crewsync.crewsync.Fragments.CreateFragment
+import com.crewsync.crewsync.Fragments.SettingsFragment
+import com.crewsync.crewsync.Fragments.DashboardFragment
 
 class MainActivity : AppCompatActivity() {
 
