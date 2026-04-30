@@ -86,7 +86,14 @@ class EventDetailActivity : AppCompatActivity() {
                     taskId = newId
                 )
 
-                ReminderScheduler.schedule(this, newId, newTask.title, newTask.dueDateMillis)
+                ReminderScheduler.scheduleTaskReminder(
+                    context = this,
+                    taskId = newId,
+                    taskTitle = newTask.title,
+                    dueDateMillis = newTask.dueDateMillis,
+                    eventId = eventId,
+                    assignedUserIds = finalAssigned
+                )
             }
         } else {
             // EDIT existing task
@@ -104,7 +111,14 @@ class EventDetailActivity : AppCompatActivity() {
             )
             viewModel.update(editedTask)
             viewModel.setAssignments(editedTask.taskId, finalAssigned)
-            ReminderScheduler.schedule(this, editedTask.taskId, editedTask.title, editedTask.dueDateMillis)
+            ReminderScheduler.scheduleTaskReminder(
+                context = this,
+                taskId = editedTask.taskId,
+                taskTitle = editedTask.title,
+                dueDateMillis = editedTask.dueDateMillis,
+                eventId = eventId,
+                assignedUserIds = finalAssigned
+            )
         }
     }
 
@@ -162,7 +176,7 @@ class EventDetailActivity : AppCompatActivity() {
             },
             onDelete = { task ->
                 viewModel.deleteTask(task.taskId, currentUserId)
-                ReminderScheduler.cancel(this, task.taskId)
+                ReminderScheduler.cancelTaskReminder(this, task.taskId)
             },
             onEdit = { task ->
                 launchEditTask(task)
@@ -194,7 +208,7 @@ class EventDetailActivity : AppCompatActivity() {
 
                     btnDelete.visibility == View.VISIBLE && isTapInsideView(btnDelete, childX, childY) -> {
                         viewModel.deleteTask(task.taskId, currentUserId)
-                        ReminderScheduler.cancel(this@EventDetailActivity, task.taskId)
+                        ReminderScheduler.cancelTaskReminder(this@EventDetailActivity, task.taskId)
                         return true
                     }
 

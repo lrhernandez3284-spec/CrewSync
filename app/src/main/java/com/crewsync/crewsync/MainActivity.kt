@@ -1,5 +1,7 @@
 package com.crewsync.crewsync
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -12,6 +14,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        requestNotificationPermissionIfNeeded()
 
         val bottom = findViewById<BottomNavigationView>(R.id.bottomNav)
 
@@ -37,5 +41,13 @@ class MainActivity : AppCompatActivity() {
             true
         }
     }
-}
 
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                5001
+            )
+        }
+    }
+}

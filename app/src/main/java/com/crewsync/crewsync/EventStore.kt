@@ -115,6 +115,14 @@ object EventStore {
             eventId = event.id
         )
 
+        ReminderScheduler.scheduleEventReminder(
+            context = context,
+            eventId = event.id,
+            eventTitle = event.title,
+            eventMillis = event.dateTimeMillis ?: dateTimeMillis,
+            assignedUserIds = finalAssigned
+        )
+
         return event
     }
 

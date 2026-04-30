@@ -100,7 +100,14 @@ class CreateFragment : Fragment() {
                     taskId = newId
                 )
 
-                ReminderScheduler.schedule(requireContext(), newId, task.title, task.dueDateMillis)
+                ReminderScheduler.scheduleTaskReminder(
+                    context = requireContext(),
+                    taskId = newId,
+                    taskTitle = task.title,
+                    dueDateMillis = task.dueDateMillis,
+                    eventId = eventId,
+                    assignedUserIds = assigned
+                )
 
                 Toast.makeText(requireContext(), "Task created", Toast.LENGTH_SHORT).show()
             }
