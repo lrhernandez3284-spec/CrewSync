@@ -95,6 +95,18 @@ object EventStore {
             .putInt(KEY_NEXT_ID, nextId + 1)
             .apply()
 
+        val actor = UserPrefs.getCurrentUserId(context)
+        val usersToNotify = UserStore.getUsers(context)
+
+        NotificationStore.addForUsers(
+            context = context,
+            userIds = usersToNotify,
+            actorUserId = actor,
+            message = "$actor created event ${event.title}",
+            targetType = "event",
+            eventId = event.id
+        )
+
         return event
     }
 

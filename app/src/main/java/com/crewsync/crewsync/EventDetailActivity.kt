@@ -69,6 +69,17 @@ class EventDetailActivity : AppCompatActivity() {
             )
             viewModel.insertWithCallback(newTask) { newId ->
                 viewModel.setAssignments(newId, finalAssigned)
+
+                NotificationStore.addForUsers(
+                    context = this,
+                    userIds = finalAssigned,
+                    actorUserId = currentUserId,
+                    message = "$currentUserId created task ${newTask.title}",
+                    targetType = "task",
+                    eventId = eventId,
+                    taskId = newId
+                )
+
                 ReminderScheduler.schedule(this, newId, newTask.title, newTask.dueDateMillis)
             }
         } else {
