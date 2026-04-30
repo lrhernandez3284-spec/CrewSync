@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.myapplication"
+    namespace = "com.lr.hernandez.crewsync""
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.myapplication"
+        applicationId = "com.lrhernandez.crewsync"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
