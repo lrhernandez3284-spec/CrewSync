@@ -17,7 +17,7 @@ interface TaskDao {
     @Update
     suspend fun update(task: Task)
 
-    // creator-only delete, BUT manager can delete any task
+    // creator-only delete, BUT manager can delete all:
     @Query("""
         DELETE FROM tasks
         WHERE taskId = :taskId
@@ -25,7 +25,6 @@ interface TaskDao {
     """)
     suspend fun deleteIfCreator(taskId: Int, userId: String): Int
 
-    // Original: tasks for event (no filtering)
     @Query("""
         SELECT * FROM tasks
         WHERE eventId = :eventId
@@ -33,7 +32,6 @@ interface TaskDao {
     """)
     fun getTasksForEvent(eventId: Int): LiveData<List<Task>>
 
-    // Original: search tasks for event (no user filtering)
     @Query("""
         SELECT * FROM tasks
         WHERE eventId = :eventId
@@ -43,28 +41,11 @@ interface TaskDao {
     """)
     fun searchTasks(eventId: Int, query: String, category: String): LiveData<List<Task>>
 
-    // User-filtered search (manager sees all)
-    @Query("""
-        SELECT DISTINCT t.* FROM tasks t
-        LEFT JOIN task_assignments a ON a.taskId = t.taskId
-        WHERE t.eventId = :eventId
-          AND t.title LIKE '%' || :query || '%'
-          AND (:category = 'All' OR t.category = :category)
-          AND (
-                :userId = 'manager'
-                OR t.createdByUserId = :userId
-                OR a.userId = :userId
-          )
-        ORDER BY t.category ASC, t.dueDateMillis ASC
-    """)
-    fun searchTasksForUser(eventId: Int, userId: String, query: String, category: String): LiveData<List<Task>>
-
-    // IMPORTANT: Non-suspend counts (so you can call them from Dispatchers.IO)
     @Query("SELECT COUNT(*) FROM tasks WHERE eventId = :eventId")
-    fun countTotalNow(eventId: Int): Int
+    suspend fun countTotal(eventId: Int): Int
 
     @Query("SELECT COUNT(*) FROM tasks WHERE eventId = :eventId AND isDone = 1")
-    fun countDoneNow(eventId: Int): Int
+    suspend fun countDone(eventId: Int): Int
 
 
     // ---------------- ASSIGNMENTS (join table) ----------------
@@ -81,6 +62,14 @@ interface TaskDao {
     @Query("SELECT userId FROM task_assignments WHERE taskId = :taskId")
     suspend fun getAssignedUsers(taskId: Int): List<String>
 
-    @Query("SELECT * FROM task_assignments WHERE taskId = :taskId")
-    suspend fun getAssignments(taskId: Int): List<TaskAssignment>
+    @Query("""
+        SELECT DISTINCT t.* FROM tasks t
+        INNER JOIN task_assignments a ON a.taskId = t.taskId
+        WHERE t.eventId = :eventId
+          AND a.userId = :userId
+          AND t.title LIKE '%' || :query || '%'
+          AND (:category = 'All' OR t.category = :category)
+        ORDER BY t.category ASC, t.dueDateMillis ASC
+    """)
+    fun searchTasksForUser(eventId: Int, userId: String, query: String, category: String): LiveData<List<Task>>
 }

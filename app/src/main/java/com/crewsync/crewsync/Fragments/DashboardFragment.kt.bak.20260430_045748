@@ -15,7 +15,6 @@ import com.crewsync.crewsync.PinActivity
 import com.crewsync.crewsync.R
 import com.crewsync.crewsync.UserPrefs
 import com.crewsync.crewsync.UserStore
-import com.crewsync.crewsync.db.CrewSyncDatabase
 
 class DashboardFragment : Fragment() {
 

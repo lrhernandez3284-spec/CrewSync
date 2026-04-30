@@ -67,8 +67,10 @@ class EventAdapter(
             // Simple status rule (matches what you described)
             // NOTE: This assumes the event time is "upcoming/past" based on NOW.
             // If you later store a real eventDateMillis, use that instead.
+            val isPast = false // TODO when you store event time as millis
             val status = when {
                 total > 0 && done == total -> "Complete"
+                total == 0 && isPast -> "Overdue"
                 done > 0 -> "In Progress"
                 else -> "Upcoming"
             }

@@ -1,33 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="14dp">
+    android:padding="12dp">
+
+    <!-- Category color bar -->
+    <View
+        android:id="@+id/vCategoryBar"
+        android:layout_width="8dp"
+        android:layout_height="0dp"
+        android:background="#FF888888"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- Category dot -->
+    <View
+        android:id="@+id/vCategoryDot"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="#FF888888"
+        app:layout_constraintTop_toTopOf="@id/tvEventMeta"
+        app:layout_constraintBottom_toBottomOf="@id/tvEventMeta"
+        app:layout_constraintStart_toEndOf="@id/vCategoryBar"
+        android:layout_marginStart="12dp"/>
 
     <TextView
         android:id="@+id/tvEventTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Event Title"
         android:textSize="20sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/vCategoryBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="12dp"/>
 
     <TextView
         android:id="@+id/tvEventMeta"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Category • Date/Time"
         android:textSize="14sp"
+        app:layout_constraintStart_toEndOf="@id/vCategoryDot"
+        app:layout_constraintTop_toBottomOf="@id/tvEventTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="4dp"/>
 
     <TextView
         android:id="@+id/tvEventLocation"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Location"
         android:textSize="14sp"
-        android:layout_marginTop="2dp"/>
+        app:layout_constraintStart_toStartOf="@id/tvEventMeta"
+        app:layout_constraintTop_toBottomOf="@id/tvEventMeta"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="6dp"/>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tvEventStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Status: —"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tvEventMeta"
+        app:layout_constraintTop_toBottomOf="@id/tvEventLocation"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/tvEventProgress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Progress: —"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tvEventMeta"
+        app:layout_constraintTop_toBottomOf="@id/tvEventStatus"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="4dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

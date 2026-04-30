@@ -60,8 +60,8 @@ class TaskViewModel(private val dao: TaskDao) : ViewModel() {
 
     fun loadProgress(eventId: Int, callback: (done: Int, total: Int) -> Unit) {
         viewModelScope.launch {
-            val total = dao.countTotalNow(eventId)
-            val done = dao.countDoneNow(eventId)
+            val total = dao.countTotal(eventId)
+            val done = dao.countDone(eventId)
             callback(done, total)
         }
     }
