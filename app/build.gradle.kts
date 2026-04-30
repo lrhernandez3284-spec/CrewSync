@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lr.hernandez.crewsync""
+    namespace = "com.crewsync.myapplication"
     compileSdk {
         version = release(36)
     }
