@@ -139,6 +139,9 @@ class CreateFragment : Fragment() {
             val i = Intent(requireContext(), TaskEditActivity::class.java)
             i.putExtra("eventId", selectedEvent.id)
             i.putExtra("taskId", 0)
+            if (selectedEvent.dateTimeMillis != null) {
+                i.putExtra("dueDateMillis", selectedEvent.dateTimeMillis)
+            }
             createTaskLauncher.launch(i)
         }
 

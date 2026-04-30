@@ -26,6 +26,7 @@ class EventDetailActivity : AppCompatActivity() {
     private lateinit var taskAdapter: TaskAdapter
 
     private var eventId: Int = -1
+    private var eventDateTimeMillis: Long = -1L
     private lateinit var currentUserId: String
 
     private lateinit var tvProgress: TextView
@@ -123,6 +124,7 @@ class EventDetailActivity : AppCompatActivity() {
 
         // ---- event header ----
         eventId = intent.getIntExtra("eventId", -1)
+        eventDateTimeMillis = intent.getLongExtra("dateTimeMillis", -1L)
 
         val tvTitle = findViewById<TextView>(R.id.tvTitle)
         val tvMeta = findViewById<TextView>(R.id.tvMeta)
@@ -217,7 +219,9 @@ class EventDetailActivity : AppCompatActivity() {
             val i = Intent(this, TaskEditActivity::class.java)
             i.putExtra("eventId", eventId)
             i.putExtra("taskId", 0)
-            // default assignedUsers empty -> we default to creator in result handler
+            if (eventDateTimeMillis > 0L) {
+                i.putExtra("dueDateMillis", eventDateTimeMillis)
+            }
             taskEditLauncher.launch(i)
         }
 

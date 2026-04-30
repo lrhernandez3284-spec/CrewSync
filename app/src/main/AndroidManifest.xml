@@ -30,6 +30,7 @@
     	    android:exported="false" />
 	<activity android:name=".UserManagerActivity" />
         <activity android:name=".UserProfileActivity" />
+        <activity android:name=".CategoryManagerActivity" />
     </application>
 
 </manifest>

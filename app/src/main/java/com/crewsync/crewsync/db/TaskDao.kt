@@ -67,6 +67,10 @@ interface TaskDao {
     fun countDoneNow(eventId: Int): Int
 
 
+
+    @Query("UPDATE tasks SET category = :newCategory WHERE category = :oldCategory")
+    suspend fun updateTaskCategory(oldCategory: String, newCategory: String)
+
     // ---------------- ASSIGNMENTS (join table) ----------------
 
     @Insert

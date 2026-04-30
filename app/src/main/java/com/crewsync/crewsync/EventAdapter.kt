@@ -88,6 +88,7 @@ class EventAdapter(
             intent.putExtra("category", e.category)
             intent.putExtra("location", e.location)
             intent.putExtra("notesPreview", e.notesPreview)
+            intent.putExtra("dateTimeMillis", e.dateTimeMillis ?: -1L)
             holder.itemView.context.startActivity(intent)
         }
     }

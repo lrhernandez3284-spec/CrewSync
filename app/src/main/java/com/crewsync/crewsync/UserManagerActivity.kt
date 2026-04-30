@@ -52,6 +52,20 @@ class UserManagerActivity : AppCompatActivity() {
             if (!ok) {
                 Toast.makeText(this, "Invalid or existing user id", Toast.LENGTH_SHORT).show()
             } else {
+                val addedUserId = newId.trim().lowercase()
+                val actor = UserPrefs.getCurrentUserId(this)
+                val addedName = UserStore.getDisplayName(this, addedUserId)
+
+                NotificationStore.addForUsers(
+                    context = this,
+                    userIds = UserStore.getUsers(this),
+                    actorUserId = actor,
+                    message = "$actor added new user $addedName",
+                    targetType = "user",
+                    eventId = 0,
+                    taskId = 0
+                )
+
                 Toast.makeText(this, "User added", Toast.LENGTH_SHORT).show()
                 etNewUser.text.clear()
                 etNewDisplayName.text.clear()

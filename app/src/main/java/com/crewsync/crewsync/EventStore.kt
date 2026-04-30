@@ -118,6 +118,22 @@ object EventStore {
         return event
     }
 
+
+    fun updateCategoryForCustomEvents(context: Context, oldCategory: String, newCategory: String) {
+        val updated = getCustomEvents(context).map { event ->
+            if (event.category.equals(oldCategory, ignoreCase = true)) {
+                event.copy(category = newCategory)
+            } else {
+                event
+            }
+        }
+
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_EVENTS, encodeEvents(updated))
+            .apply()
+    }
+
     private fun getCustomEvents(context: Context): List<Event> {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val raw = prefs.getString(KEY_EVENTS, "") ?: ""

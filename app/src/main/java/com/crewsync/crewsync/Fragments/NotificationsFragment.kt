@@ -107,6 +107,11 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun openTarget(item: NotificationItem) {
+        if (item.targetType == "user") {
+            Toast.makeText(requireContext(), "User update notification", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val event = EventRepository.getEventById(requireContext(), item.eventId)
 
         if (event == null) {
@@ -121,6 +126,7 @@ class NotificationsFragment : Fragment() {
         intent.putExtra("category", event.category)
         intent.putExtra("location", event.location)
         intent.putExtra("notesPreview", event.notesPreview)
+        intent.putExtra("dateTimeMillis", event.dateTimeMillis ?: -1L)
         intent.putExtra("targetTaskId", item.taskId)
         startActivity(intent)
     }

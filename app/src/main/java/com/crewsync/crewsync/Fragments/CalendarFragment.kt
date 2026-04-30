@@ -259,6 +259,7 @@ class CalendarFragment : Fragment() {
         intent.putExtra("category", event.category)
         intent.putExtra("location", event.location)
         intent.putExtra("notesPreview", event.notesPreview)
+        intent.putExtra("dateTimeMillis", event.dateTimeMillis ?: -1L)
         startActivity(intent)
     }
 
