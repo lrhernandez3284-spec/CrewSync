@@ -32,6 +32,7 @@ class TaskAdapter(
         val cbDone: CheckBox = itemView.findViewById(R.id.cbDone)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
         val tvMeta: TextView = itemView.findViewById(R.id.tvTaskMeta)
+        val btnEdit: Button = itemView.findViewById(R.id.btnEdit)
         val btnDelete: Button = itemView.findViewById(R.id.btnDelete)
     }
 
@@ -65,6 +66,8 @@ class TaskAdapter(
         val canDelete = (t.createdByUserId == currentUserId) || (currentUserId == "manager")
         holder.btnDelete.visibility = if (canDelete) View.VISIBLE else View.GONE
         holder.btnDelete.setOnClickListener { onDelete(t) }
+
+        holder.btnEdit.setOnClickListener { onEdit(t) }
 
         // tap row to edit
         holder.itemView.setOnClickListener { onEdit(t) }
