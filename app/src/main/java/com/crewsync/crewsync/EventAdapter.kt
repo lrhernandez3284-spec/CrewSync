@@ -1,10 +1,10 @@
 package com.crewsync.crewsync
 
 import android.content.Intent
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -17,17 +17,19 @@ import kotlinx.coroutines.withContext
 class EventAdapter(
     private val events: List<Event>,
     private val dao: TaskDao,
-    private val lifecycleOwner: LifecycleOwner
+    private val lifecycleOwner: LifecycleOwner,
+    private val showRemoveButton: Boolean = false,
+    private val onRemoveEvent: ((Event) -> Unit)? = null
 ) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
 
     class EventViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val vCategoryBar: View? = itemView.findViewById(R.id.vCategoryBar)
-        val vCategoryDot: View? = itemView.findViewById(R.id.vCategoryDot)
         val tvTitle: TextView = itemView.findViewById(R.id.tvEventTitle)
         val tvMeta: TextView = itemView.findViewById(R.id.tvEventMeta)
         val tvLocation: TextView = itemView.findViewById(R.id.tvEventLocation)
         val tvStatus: TextView = itemView.findViewById(R.id.tvEventStatus)
         val tvProgress: TextView = itemView.findViewById(R.id.tvEventProgress)
+        val btnHideEvent: Button = itemView.findViewById(R.id.btnHideEvent)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
@@ -40,43 +42,39 @@ class EventAdapter(
         val e = events[position]
 
         holder.tvTitle.text = e.title
-        holder.tvMeta.text = "${e.category} • ${e.dateTime}"
+
+        val timingStatus = eventTimingStatus(e)
+        holder.tvMeta.text = "${e.category} • ${e.dateTime} • $timingStatus"
         holder.tvLocation.text = e.location ?: "No location"
 
-        val categoryColor = CategoryColorStore.getColor(holder.itemView.context, e.category)
-        holder.vCategoryBar?.setBackgroundColor(categoryColor)
-        holder.vCategoryDot?.setBackgroundColor(categoryColor)
+        holder.vCategoryBar?.let {
+            val color = CategoryColorStore.getColor(holder.itemView.context, e.category)
+            it.setBackgroundColor(color)
+        }
 
-        holder.tvStatus.text = "Status: loading..."
-        holder.tvProgress.text = "Progress: loading..."
+        holder.tvStatus.text = "Event: $timingStatus"
+        holder.tvProgress.text = "Tasks: —"
+
+        holder.btnHideEvent.visibility = if (showRemoveButton) View.VISIBLE else View.GONE
+        holder.btnHideEvent.setOnClickListener {
+            onRemoveEvent?.invoke(e)
+        }
 
         lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val total = dao.countTotalNow(e.id)
             val done = dao.countDoneNow(e.id)
             val percent = if (total == 0) 0 else (done * 100 / total)
 
-            val now = System.currentTimeMillis()
-            val eventMillis = e.dateTimeMillis
-            val isPast = eventMillis != null && eventMillis < now
-
-            val status = when {
-                total > 0 && done == total -> "Complete"
-                total > 0 && done > 0 -> "In Progress"
-                isPast -> "Past Due"
-                else -> "Upcoming"
-            }
-
-            val statusColor = when (status) {
-                "Complete" -> Color.rgb(34, 139, 34)
-                "In Progress" -> Color.rgb(204, 132, 0)
-                "Past Due" -> Color.rgb(180, 40, 40)
-                else -> Color.DKGRAY
+            val taskStatus = when {
+                total == 0 -> "No tasks"
+                done == total -> "Complete"
+                done > 0 -> "In Progress"
+                else -> "Not Started"
             }
 
             withContext(Dispatchers.Main) {
-                holder.tvStatus.text = "Status: $status"
-                holder.tvStatus.setTextColor(statusColor)
-                holder.tvProgress.text = "Progress: $percent% ($done/$total)"
+                holder.tvStatus.text = "Event: $timingStatus"
+                holder.tvProgress.text = "Tasks: $taskStatus • $percent% ($done/$total)"
             }
         }
 
@@ -91,6 +89,11 @@ class EventAdapter(
             intent.putExtra("dateTimeMillis", e.dateTimeMillis ?: -1L)
             holder.itemView.context.startActivity(intent)
         }
+    }
+
+    private fun eventTimingStatus(event: Event): String {
+        val millis = event.dateTimeMillis ?: return "No date"
+        return if (millis < System.currentTimeMillis()) "Past" else "Upcoming"
     }
 
     override fun getItemCount(): Int = events.size

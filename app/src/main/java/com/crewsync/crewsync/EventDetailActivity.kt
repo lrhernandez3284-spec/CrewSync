@@ -12,6 +12,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener
@@ -19,6 +20,8 @@ import com.crewsync.crewsync.db.CrewSyncDatabase
 import com.crewsync.crewsync.db.Task
 import com.crewsync.crewsync.viewmodel.TaskViewModel
 import com.crewsync.crewsync.viewmodel.TaskViewModelFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class EventDetailActivity : AppCompatActivity() {
 
@@ -94,6 +97,7 @@ class EventDetailActivity : AppCompatActivity() {
                     eventId = eventId,
                     assignedUserIds = finalAssigned
                 )
+                checkEventCompletionSoon()
             }
         } else {
             // EDIT existing task
@@ -119,6 +123,7 @@ class EventDetailActivity : AppCompatActivity() {
                 eventId = eventId,
                 assignedUserIds = finalAssigned
             )
+            checkEventCompletionSoon()
         }
     }
 
@@ -173,10 +178,12 @@ class EventDetailActivity : AppCompatActivity() {
             currentUserId = currentUserId,
             onToggleDone = { task, checked ->
                 viewModel.update(task.copy(isDone = checked))
+                checkEventCompletionSoon()
             },
             onDelete = { task ->
                 viewModel.deleteTask(task.taskId, currentUserId)
                 ReminderScheduler.cancelTaskReminder(this, task.taskId)
+                checkEventCompletionSoon()
             },
             onEdit = { task ->
                 launchEditTask(task)
@@ -203,12 +210,14 @@ class EventDetailActivity : AppCompatActivity() {
                 when {
                     isTapInsideView(cb, childX, childY) -> {
                         viewModel.update(task.copy(isDone = !task.isDone))
+                        checkEventCompletionSoon()
                         return true
                     }
 
                     btnDelete.visibility == View.VISIBLE && isTapInsideView(btnDelete, childX, childY) -> {
                         viewModel.deleteTask(task.taskId, currentUserId)
                         ReminderScheduler.cancelTaskReminder(this@EventDetailActivity, task.taskId)
+                        checkEventCompletionSoon()
                         return true
                     }
 
@@ -258,6 +267,15 @@ class EventDetailActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun checkEventCompletionSoon() {
+        val dao = CrewSyncDatabase.getInstance(this).taskDao()
+        lifecycleScope.launch {
+            delay(350)
+            EventCompletionNotifier.checkAndNotifyIfComplete(this@EventDetailActivity, dao, eventId)
+        }
+    }
+
     private fun launchEditTask(task: Task) {
         viewModel.getAssignedUsers(task.taskId) { assigned ->
             runOnUiThread {
@@ -300,3 +318,4 @@ class EventDetailActivity : AppCompatActivity() {
         spCategory.setSelection(idx)
     }
 }
+
