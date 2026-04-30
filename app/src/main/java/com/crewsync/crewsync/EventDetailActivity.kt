@@ -16,8 +16,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener
+import com.crewsync.crewsync.adapters.TaskAdapter
+import com.crewsync.crewsync.data.EventCompletionNotifier
+import com.crewsync.crewsync.data.EventRepository
+import com.crewsync.crewsync.data.NotificationStore
+import com.crewsync.crewsync.data.UserPrefs
 import com.crewsync.crewsync.db.CrewSyncDatabase
 import com.crewsync.crewsync.db.Task
+import com.crewsync.crewsync.models.Event
+import com.crewsync.crewsync.reminders.ReminderScheduler
 import com.crewsync.crewsync.viewmodel.TaskViewModel
 import com.crewsync.crewsync.viewmodel.TaskViewModelFactory
 import kotlinx.coroutines.delay

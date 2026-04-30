@@ -1,7 +1,8 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.data
 
 import android.content.Context
 import android.net.Uri
+import com.crewsync.crewsync.models.NotificationItem
 
 object NotificationStore {
     private const val PREFS = "crewsync_prefs"

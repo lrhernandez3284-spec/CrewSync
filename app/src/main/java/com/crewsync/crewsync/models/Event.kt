@@ -1,4 +1,4 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.models
 
 data class Event(
     val id: Int,

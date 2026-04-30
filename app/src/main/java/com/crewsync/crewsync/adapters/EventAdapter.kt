@@ -1,4 +1,4 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.adapters
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -9,6 +9,10 @@ import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.crewsync.crewsync.data.CategoryColorStore
+import com.crewsync.crewsync.models.Event
+import com.crewsync.crewsync.EventDetailActivity
+import com.crewsync.crewsync.R
 import com.crewsync.crewsync.db.TaskDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

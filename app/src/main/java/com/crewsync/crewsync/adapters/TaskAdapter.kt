@@ -1,4 +1,4 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +7,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.crewsync.crewsync.R
+import com.crewsync.crewsync.data.UserStore
 import com.crewsync.crewsync.db.Task
 import java.text.SimpleDateFormat
 import java.util.Date

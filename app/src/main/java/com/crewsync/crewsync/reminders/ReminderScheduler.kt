@@ -1,4 +1,4 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.reminders
 
 import android.app.AlarmManager
 import android.app.PendingIntent

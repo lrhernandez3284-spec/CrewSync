@@ -12,9 +12,9 @@ import androidx.fragment.app.Fragment
 import com.crewsync.crewsync.CategoryManagerActivity
 import com.crewsync.crewsync.R
 import com.crewsync.crewsync.UserManagerActivity
-import com.crewsync.crewsync.UserPrefs
+import com.crewsync.crewsync.data.UserPrefs
 import com.crewsync.crewsync.UserProfileActivity
-import com.crewsync.crewsync.UserStore
+import com.crewsync.crewsync.data.UserStore
 
 class SettingsFragment : Fragment() {
 

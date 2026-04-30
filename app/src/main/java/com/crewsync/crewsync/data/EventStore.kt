@@ -1,7 +1,9 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.data
 
 import android.content.Context
 import android.net.Uri
+import com.crewsync.crewsync.reminders.ReminderScheduler
+import com.crewsync.crewsync.models.Event
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date

@@ -11,6 +11,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.crewsync.crewsync.data.EventRepository
+import com.crewsync.crewsync.data.NotificationStore
+import com.crewsync.crewsync.data.UserPrefs
+import com.crewsync.crewsync.data.UserStore
+import com.crewsync.crewsync.models.NotificationItem
 
 class NotificationsFragment : Fragment() {
 

@@ -13,6 +13,9 @@ import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.crewsync.crewsync.data.CategoryColorStore
+import com.crewsync.crewsync.data.EventRepository
+import com.crewsync.crewsync.models.Event
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

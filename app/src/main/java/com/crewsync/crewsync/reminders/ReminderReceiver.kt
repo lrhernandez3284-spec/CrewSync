@@ -1,5 +1,6 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.reminders
 
+import android.R
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -8,6 +9,8 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.crewsync.crewsync.data.NotificationStore
+import com.crewsync.crewsync.data.UserStore
 
 class ReminderReceiver : BroadcastReceiver() {
 
@@ -58,7 +61,7 @@ class ReminderReceiver : BroadcastReceiver() {
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_dialog_info)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)

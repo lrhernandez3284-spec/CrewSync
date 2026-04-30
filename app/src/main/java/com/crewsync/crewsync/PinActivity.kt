@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.crewsync.crewsync.data.PinPrefs
+import com.crewsync.crewsync.data.UserPrefs
+import com.crewsync.crewsync.data.UserStore
 
 class PinActivity : AppCompatActivity() {
 

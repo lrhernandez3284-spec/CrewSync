@@ -28,7 +28,7 @@
         <activity android:name=".EventEditActivity" />
 	<activity android:name=".TaskEditActivity" />
 	<receiver
-	    android:name=".ReminderReceiver"
+	    android:name=".reminders.ReminderReceiver"
     	    android:exported="false" />
 	<activity android:name=".UserManagerActivity" />
         <activity android:name=".UserProfileActivity" />

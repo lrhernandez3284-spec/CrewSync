@@ -1,6 +1,7 @@
-package com.crewsync.crewsync
+package com.crewsync.crewsync.data
 
 import android.content.Context
+import com.crewsync.crewsync.models.Event
 
 object EventRepository {
     fun getEvents(): List<Event> = EventStore.getDefaultEvents()
