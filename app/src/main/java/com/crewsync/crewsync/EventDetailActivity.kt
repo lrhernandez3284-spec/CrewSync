@@ -36,7 +36,24 @@ class EventDetailActivity : AppCompatActivity() {
     private lateinit var etSearch: EditText
     private lateinit var spCategory: Spinner
 
+    private lateinit var tvTitleHeader: TextView
+    private lateinit var tvMetaHeader: TextView
+    private lateinit var tvLocationHeader: TextView
+    private lateinit var tvNotesHeader: TextView
+
     private var currentCategory: String = "All"
+
+    private val eventEditLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val updated = EventRepository.getEventById(this, eventId)
+            if (updated != null) {
+                refreshEventHeader(updated)
+            }
+        }
+    }
+
 
     private val taskEditLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -145,15 +162,21 @@ class EventDetailActivity : AppCompatActivity() {
         eventId = intent.getIntExtra("eventId", -1)
         eventDateTimeMillis = intent.getLongExtra("dateTimeMillis", -1L)
 
-        val tvTitle = findViewById<TextView>(R.id.tvTitle)
-        val tvMeta = findViewById<TextView>(R.id.tvMeta)
-        val tvLocation = findViewById<TextView>(R.id.tvLocation)
-        val tvNotes = findViewById<TextView>(R.id.tvNotes)
+        tvTitleHeader = findViewById(R.id.tvTitle)
+        tvMetaHeader = findViewById(R.id.tvMeta)
+        tvLocationHeader = findViewById(R.id.tvLocation)
+        tvNotesHeader = findViewById(R.id.tvNotes)
 
-        tvTitle.text = intent.getStringExtra("title") ?: ""
-        tvMeta.text = "${intent.getStringExtra("category") ?: ""} • ${intent.getStringExtra("dateTime") ?: ""}"
-        tvLocation.text = intent.getStringExtra("location") ?: "No location"
-        tvNotes.text = intent.getStringExtra("notesPreview") ?: "No notes"
+        val initialEvent = EventRepository.getEventById(this, eventId)
+        if (initialEvent != null) {
+            refreshEventHeader(initialEvent)
+            eventDateTimeMillis = initialEvent.dateTimeMillis ?: eventDateTimeMillis
+        } else {
+            tvTitleHeader.text = intent.getStringExtra("title") ?: ""
+            tvMetaHeader.text = "${intent.getStringExtra("category") ?: ""} • ${intent.getStringExtra("dateTime") ?: ""}"
+            tvLocationHeader.text = intent.getStringExtra("location") ?: "No location"
+            tvNotesHeader.text = intent.getStringExtra("notesPreview") ?: "No notes"
+        }
 
         // ---- tasks UI ----
         currentUserId = UserPrefs.getCurrentUserId(this)
@@ -162,6 +185,20 @@ class EventDetailActivity : AppCompatActivity() {
         etSearch = findViewById(R.id.etSearch)
         spCategory = findViewById(R.id.spCategory)
         val btnAddTask = findViewById<Button>(R.id.btnAddTask)
+        val btnEditEvent = findViewById<Button>(R.id.btnEditEvent)
+
+        btnEditEvent.visibility = if (currentUserId == "manager") View.VISIBLE else View.GONE
+        btnEditEvent.setOnClickListener {
+            val event = EventRepository.getEventById(this, eventId)
+            if (event == null) {
+                Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val i = Intent(this, EventEditActivity::class.java)
+            i.putExtra("eventId", event.id)
+            eventEditLauncher.launch(i)
+        }
 
         val rclTasks = findViewById<RecyclerView>(R.id.rclTasks)
         rclTasks.layoutManager = LinearLayoutManager(this)
@@ -267,6 +304,15 @@ class EventDetailActivity : AppCompatActivity() {
         }
     }
 
+
+
+    private fun refreshEventHeader(event: Event) {
+        tvTitleHeader.text = event.title
+        tvMetaHeader.text = "${event.category} • ${event.dateTime}"
+        tvLocationHeader.text = event.location ?: "No location"
+        tvNotesHeader.text = event.notesPreview ?: "No notes"
+        eventDateTimeMillis = event.dateTimeMillis ?: -1L
+    }
 
     private fun checkEventCompletionSoon() {
         val dao = CrewSyncDatabase.getInstance(this).taskDao()

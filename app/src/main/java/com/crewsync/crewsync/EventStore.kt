@@ -52,12 +52,18 @@ object EventStore {
             location = location,
             notesPreview = notesPreview,
             dateTimeMillis = cal.timeInMillis,
-            assignedUserIds = emptyList() // empty means default/demo event is visible to everyone
+            assignedUserIds = emptyList()
         )
     }
 
     fun getEvents(context: Context): List<Event> {
-        return getDefaultEvents() + getCustomEvents(context)
+        val custom = getCustomEvents(context)
+        val customIds = custom.map { it.id }.toSet()
+
+        // If a default event was edited, the edited copy is stored in custom events with the same ID.
+        val defaultsNotOverridden = getDefaultEvents().filter { it.id !in customIds }
+
+        return defaultsNotOverridden + custom
     }
 
     fun getCategories(context: Context): List<String> {
@@ -126,6 +132,67 @@ object EventStore {
         return event
     }
 
+    fun updateEvent(
+        context: Context,
+        eventId: Int,
+        title: String,
+        category: String,
+        dateTimeMillis: Long,
+        location: String?,
+        notesPreview: String?,
+        assignedUserIds: List<String>
+    ): Boolean {
+        val finalAssigned = assignedUserIds.distinct().filter { it.isNotBlank() }
+        if (eventId <= 0 || title.isBlank() || finalAssigned.isEmpty()) return false
+
+        val updatedEvent = Event(
+            id = eventId,
+            title = title,
+            dateTime = dateFormat.format(Date(dateTimeMillis)),
+            category = category,
+            location = location,
+            notesPreview = notesPreview,
+            dateTimeMillis = dateTimeMillis,
+            assignedUserIds = finalAssigned
+        )
+
+        val current = getCustomEvents(context).toMutableList()
+        val idx = current.indexOfFirst { it.id == eventId }
+
+        if (idx >= 0) {
+            current[idx] = updatedEvent
+        } else {
+            // This supports editing a default demo event by storing an override copy with the same ID.
+            current.add(updatedEvent)
+        }
+
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_EVENTS, encodeEvents(current))
+            .apply()
+
+        val actor = UserPrefs.getCurrentUserId(context)
+
+        NotificationStore.addForUsers(
+            context = context,
+            userIds = finalAssigned,
+            actorUserId = actor,
+            message = "$actor updated event ${updatedEvent.title}",
+            targetType = "event",
+            eventId = updatedEvent.id
+        )
+
+        ReminderScheduler.cancelEventReminder(context, updatedEvent.id)
+        ReminderScheduler.scheduleEventReminder(
+            context = context,
+            eventId = updatedEvent.id,
+            eventTitle = updatedEvent.title,
+            eventMillis = updatedEvent.dateTimeMillis ?: dateTimeMillis,
+            assignedUserIds = finalAssigned
+        )
+
+        return true
+    }
 
     fun updateCategoryForCustomEvents(context: Context, oldCategory: String, newCategory: String) {
         val updated = getCustomEvents(context).map { event ->

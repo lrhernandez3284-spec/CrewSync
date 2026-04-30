@@ -12,6 +12,7 @@ import java.util.Locale
 class EventEditActivity : AppCompatActivity() {
 
     private var eventMillis: Long = System.currentTimeMillis()
+    private var editingEventId: Int = 0
     private val displayFormat = SimpleDateFormat("EEE MMM d, yyyy h:mm a", Locale.US)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +26,14 @@ class EventEditActivity : AppCompatActivity() {
             return
         }
 
+        editingEventId = intent.getIntExtra("eventId", 0)
+        val existingEvent = if (editingEventId > 0) {
+            EventRepository.getEventById(this, editingEventId)
+        } else {
+            null
+        }
+
+        val tvTitle = findViewById<TextView>(R.id.tvEventEditTitle)
         val etTitle = findViewById<EditText>(R.id.etEventTitle)
         val etCategory = findViewById<AutoCompleteTextView>(R.id.etEventCategory)
         val listUsers = findViewById<ListView>(R.id.listEventUsers)
@@ -34,6 +43,9 @@ class EventEditActivity : AppCompatActivity() {
         val etLocation = findViewById<EditText>(R.id.etEventLocation)
         val etNotes = findViewById<EditText>(R.id.etEventNotes)
         val btnSave = findViewById<Button>(R.id.btnSaveEvent)
+
+        tvTitle.text = if (editingEventId > 0) "Edit Event" else "Create Event"
+        btnSave.text = if (editingEventId > 0) "Save Event Changes" else "Save Event"
 
         val categoryAdapter = ArrayAdapter(
             this,
@@ -73,6 +85,28 @@ class EventEditActivity : AppCompatActivity() {
             updateSelectAllCheckbox()
         }
 
+        if (existingEvent != null) {
+            etTitle.setText(existingEvent.title)
+            etCategory.setText(existingEvent.category, false)
+            etLocation.setText(existingEvent.location ?: "")
+            etNotes.setText(existingEvent.notesPreview ?: "")
+            eventMillis = existingEvent.dateTimeMillis ?: System.currentTimeMillis()
+
+            val selectedUsers =
+                if (existingEvent.assignedUserIds.isNotEmpty()) {
+                    existingEvent.assignedUserIds
+                } else {
+                    users
+                }
+
+            for (i in users.indices) {
+                if (selectedUsers.contains(users[i])) {
+                    listUsers.setItemChecked(i, true)
+                }
+            }
+            updateSelectAllCheckbox()
+        }
+
         tvDateTime.text = "Date/Time: ${displayFormat.format(eventMillis)}"
 
         btnPickDateTime.setOnClickListener {
@@ -106,17 +140,42 @@ class EventEditActivity : AppCompatActivity() {
             val location = etLocation.text.toString().trim().ifBlank { null }
             val notes = etNotes.text.toString().trim().ifBlank { null }
 
-            EventStore.addEvent(
-                context = this,
-                title = title,
-                category = category,
-                dateTimeMillis = eventMillis,
-                location = location,
-                notesPreview = notes,
-                assignedUserIds = assigned
-            )
+            val success =
+                if (editingEventId > 0) {
+                    EventStore.updateEvent(
+                        context = this,
+                        eventId = editingEventId,
+                        title = title,
+                        category = category,
+                        dateTimeMillis = eventMillis,
+                        location = location,
+                        notesPreview = notes,
+                        assignedUserIds = assigned
+                    )
+                } else {
+                    EventStore.addEvent(
+                        context = this,
+                        title = title,
+                        category = category,
+                        dateTimeMillis = eventMillis,
+                        location = location,
+                        notesPreview = notes,
+                        assignedUserIds = assigned
+                    )
+                    true
+                }
 
-            Toast.makeText(this, "Event created", Toast.LENGTH_SHORT).show()
+            if (!success) {
+                Toast.makeText(this, "Could not save event", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            Toast.makeText(
+                this,
+                if (editingEventId > 0) "Event updated" else "Event created",
+                Toast.LENGTH_SHORT
+            ).show()
+
             setResult(RESULT_OK)
             finish()
         }

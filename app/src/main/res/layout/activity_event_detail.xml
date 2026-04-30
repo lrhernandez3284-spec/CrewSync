@@ -7,13 +7,12 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Existing event details -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Title"
-        android:textSize="22sp"
+        android:text="Event Title"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,7 +22,8 @@
         android:id="@+id/tvMeta"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Category • DateTime"
+        android:text="Category • Date/Time"
+        android:textSize="15sp"
         android:layout_marginTop="6dp"
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +34,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Location"
-        android:layout_marginTop="6dp"
+        android:textSize="15sp"
+        android:layout_marginTop="4dp"
         app:layout_constraintTop_toBottomOf="@id/tvMeta"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -43,21 +44,31 @@
         android:id="@+id/tvNotes"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Notes preview"
-        android:layout_marginTop="8dp"
+        android:text="Notes"
+        android:textSize="15sp"
+        android:layout_marginTop="4dp"
         app:layout_constraintTop_toBottomOf="@id/tvLocation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Task tools -->
+    <Button
+        android:id="@+id/btnEditEvent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Edit Event"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/tvNotes"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <TextView
         android:id="@+id/tvProgress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Progress: 0%"
         android:textStyle="bold"
-        android:layout_marginTop="12dp"
-        app:layout_constraintTop_toBottomOf="@id/tvNotes"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/btnEditEvent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
