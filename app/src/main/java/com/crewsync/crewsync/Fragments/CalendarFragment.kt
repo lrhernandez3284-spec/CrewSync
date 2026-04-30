@@ -1,7 +1,6 @@
 package com.crewsync.crewsync
 
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -75,7 +74,7 @@ class CalendarFragment : Fragment() {
                 gravity = Gravity.CENTER
                 typeface = Typeface.DEFAULT_BOLD
                 textSize = 13f
-                setTextColor(Color.DKGRAY)
+                setTextColor(color(R.color.text_secondary))
             }
 
             gridWeekHeader.addView(tv, gridParams())
@@ -84,7 +83,6 @@ class CalendarFragment : Fragment() {
 
     private fun renderCalendar() {
         gridCalendar.removeAllViews()
-
         tvCalendarTitle.text = monthFormat.format(visibleMonth.time)
 
         val monthCal = visibleMonth.clone() as Calendar
@@ -93,7 +91,6 @@ class CalendarFragment : Fragment() {
         val firstDayOfWeek = monthCal.get(Calendar.DAY_OF_WEEK)
         val daysInMonth = monthCal.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-        // Blank cells before the first day
         for (i in 1 until firstDayOfWeek) {
             val blank = TextView(requireContext()).apply {
                 text = ""
@@ -119,21 +116,24 @@ class CalendarFragment : Fragment() {
         val isSelected = sameDate(date, selectedDay)
 
         val bg = GradientDrawable().apply {
-            cornerRadius = 12f
+            cornerRadius = dp(10).toFloat()
             setColor(
                 when {
-                    isSelected -> Color.rgb(230, 240, 255)
-                    isToday -> Color.rgb(240, 240, 240)
-                    else -> Color.TRANSPARENT
+                    isSelected -> color(R.color.bg_surface_soft)
+                    isToday -> color(R.color.bg_surface_2)
+                    else -> color(R.color.bg_main)
                 }
             )
-            setStroke(1, Color.rgb(220, 220, 220))
+            setStroke(
+                if (isSelected) dp(2) else dp(1),
+                if (isSelected) color(R.color.accent_cyan) else color(R.color.stroke_soft)
+            )
         }
 
         val cell = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.TOP
-            setPadding(6, 6, 6, 6)
+            setPadding(dp(5), dp(5), dp(5), dp(5))
             background = bg
             isClickable = true
             setOnClickListener {
@@ -145,32 +145,32 @@ class CalendarFragment : Fragment() {
         val dayNumber = TextView(requireContext()).apply {
             text = date.get(Calendar.DAY_OF_MONTH).toString()
             textSize = 13f
-            typeface = if (isToday) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
-            setTextColor(Color.BLACK)
+            typeface = if (isToday || isSelected) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
+            setTextColor(
+                if (isSelected) color(R.color.text_primary)
+                else color(R.color.text_secondary)
+            )
         }
 
         cell.addView(dayNumber)
 
-        // Show up to two colored event chips in the day cell
         events.take(2).forEach { event ->
             val chip = TextView(requireContext()).apply {
                 text = event.title.take(12)
                 textSize = 10f
-                setTextColor(Color.WHITE)
+                setTextColor(color(R.color.text_primary))
                 maxLines = 1
-                setPadding(5, 2, 5, 2)
+                setPadding(dp(5), dp(2), dp(5), dp(2))
                 background = roundedColor(CategoryColorStore.getColor(requireContext(), event.category))
                 isClickable = true
-                setOnClickListener {
-                    openEvent(event)
-                }
+                setOnClickListener { openEvent(event) }
             }
 
             val chipParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                topMargin = 4
+                topMargin = dp(4)
             }
 
             cell.addView(chip, chipParams)
@@ -180,7 +180,7 @@ class CalendarFragment : Fragment() {
             val more = TextView(requireContext()).apply {
                 text = "+${events.size - 2} more"
                 textSize = 10f
-                setTextColor(Color.DKGRAY)
+                setTextColor(color(R.color.text_muted))
             }
             cell.addView(more)
         }
@@ -192,14 +192,16 @@ class CalendarFragment : Fragment() {
         val events = eventsForDate(selectedDay)
 
         tvSelectedDay.text = "Events for ${selectedFormat.format(selectedDay.time)}"
+        tvSelectedDay.setTextColor(color(R.color.text_primary))
+
         listSelectedEvents.removeAllViews()
 
         if (events.isEmpty()) {
             val empty = TextView(requireContext()).apply {
                 text = "No events scheduled."
                 textSize = 15f
-                setTextColor(Color.DKGRAY)
-                setPadding(0, 8, 0, 8)
+                setTextColor(color(R.color.text_muted))
+                setPadding(0, dp(10), 0, dp(10))
             }
             listSelectedEvents.addView(empty)
             return
@@ -209,31 +211,38 @@ class CalendarFragment : Fragment() {
             val row = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(0, 8, 0, 8)
+                setPadding(dp(12), dp(12), dp(12), dp(12))
+                background = cardBg()
                 isClickable = true
-                setOnClickListener {
-                    openEvent(event)
-                }
+                setOnClickListener { openEvent(event) }
             }
 
             val colorBar = View(requireContext()).apply {
                 background = roundedColor(CategoryColorStore.getColor(requireContext(), event.category))
             }
 
-            val colorParams = LinearLayout.LayoutParams(14, 60).apply {
-                marginEnd = 10
+            val colorParams = LinearLayout.LayoutParams(dp(6), LinearLayout.LayoutParams.MATCH_PARENT).apply {
+                marginEnd = dp(12)
             }
 
             val text = TextView(requireContext()).apply {
                 this.text = "${event.title}\n${event.category} • ${event.dateTime}"
                 textSize = 15f
-                setTextColor(Color.BLACK)
+                setTextColor(color(R.color.text_primary))
+                setLineSpacing(2f, 1.05f)
             }
 
             row.addView(colorBar, colorParams)
             row.addView(text, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
 
-            listSelectedEvents.addView(row)
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = dp(10)
+            }
+
+            listSelectedEvents.addView(row, params)
         }
     }
 
@@ -271,8 +280,16 @@ class CalendarFragment : Fragment() {
 
     private fun roundedColor(color: Int): GradientDrawable {
         return GradientDrawable().apply {
-            cornerRadius = 10f
+            cornerRadius = dp(7).toFloat()
             setColor(color)
+        }
+    }
+
+    private fun cardBg(): GradientDrawable {
+        return GradientDrawable().apply {
+            cornerRadius = dp(18).toFloat()
+            setColor(color(R.color.bg_surface))
+            setStroke(dp(1), color(R.color.stroke_soft))
         }
     }
 
@@ -281,16 +298,24 @@ class CalendarFragment : Fragment() {
             width = 0
             height = GridLayout.LayoutParams.WRAP_CONTENT
             columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-            setMargins(2, 2, 2, 2)
+            setMargins(dp(2), dp(2), dp(2), dp(2))
         }
     }
 
     private fun dayCellParams(): GridLayout.LayoutParams {
         return GridLayout.LayoutParams().apply {
             width = 0
-            height = 130
+            height = dp(74)
             columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-            setMargins(3, 3, 3, 3)
+            setMargins(dp(2), dp(2), dp(2), dp(2))
         }
+    }
+
+    private fun color(resId: Int): Int {
+        return resources.getColor(resId, null)
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
     }
 }

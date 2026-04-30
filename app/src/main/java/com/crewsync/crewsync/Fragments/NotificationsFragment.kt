@@ -37,11 +37,12 @@ class NotificationsFragment : Fragment() {
 
     private fun renderNotifications() {
         val currentUser = UserPrefs.getCurrentUserId(requireContext())
+        val currentName = UserStore.getDisplayName(requireContext(), currentUser)
         val items = NotificationStore.getNotificationsForUser(requireContext(), currentUser)
 
         tvSubtitle.text =
-            if (currentUser == "manager") "Recent activity for all users"
-            else "Recent activity for $currentUser"
+            if (currentUser == "manager") "Recent activity across CrewSync"
+            else "Recent activity for $currentName"
 
         listNotifications.removeAllViews()
 
@@ -49,9 +50,18 @@ class NotificationsFragment : Fragment() {
             val empty = TextView(requireContext()).apply {
                 text = "No notifications yet."
                 textSize = 16f
-                setPadding(0, 20, 0, 20)
+                setTextColor(resources.getColor(R.color.text_muted, null))
+                setPadding(16, 28, 16, 28)
+                setBackgroundResource(R.drawable.bg_notification_card)
             }
-            listNotifications.addView(empty)
+
+            listNotifications.addView(
+                empty,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            )
             return
         }
 
@@ -62,11 +72,11 @@ class NotificationsFragment : Fragment() {
 
     private fun buildNotificationRow(item: NotificationItem): View {
         val row = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
+            orientation = LinearLayout.HORIZONTAL
             setPadding(14, 14, 14, 14)
             isClickable = true
             isFocusable = true
-            setBackgroundResource(android.R.drawable.dialog_holo_light_frame)
+            setBackgroundResource(R.drawable.bg_notification_card)
             setOnClickListener {
                 openTarget(item)
             }
@@ -80,30 +90,81 @@ class NotificationsFragment : Fragment() {
                 item.message
             }
 
+        val avatarText = TextView(requireContext()).apply {
+            text = actorInitial(actorName, item.actorUserId)
+            textSize = 18f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = android.view.Gravity.CENTER
+            setTextColor(resources.getColor(R.color.text_primary, null))
+            setBackgroundResource(R.drawable.bg_notification_avatar)
+        }
+
+        val avatarParams = LinearLayout.LayoutParams(dp(48), dp(48)).apply {
+            marginEnd = dp(12)
+        }
+
+        row.addView(avatarText, avatarParams)
+
+        val textColumn = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
         val message = TextView(requireContext()).apply {
             text = displayMessage
             textSize = 16f
             typeface = Typeface.DEFAULT_BOLD
+            setTextColor(resources.getColor(R.color.text_primary, null))
+            setLineSpacing(2f, 1.05f)
         }
 
         val time = TextView(requireContext()).apply {
-            text = "For ${item.userId} • ${formatTime(item.createdAtMillis)}"
+            text = notificationMeta(item)
             textSize = 13f
+            setTextColor(resources.getColor(R.color.text_muted, null))
+            setPadding(0, 6, 0, 0)
         }
 
-        row.addView(message)
-        row.addView(time)
+        textColumn.addView(message)
+        textColumn.addView(time)
+
+        row.addView(
+            textColumn,
+            LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        )
 
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply {
-            bottomMargin = 10
+            bottomMargin = dp(12)
         }
 
         row.layoutParams = params
 
         return row
+    }
+
+    private fun notificationMeta(item: NotificationItem): String {
+        val currentUser = UserPrefs.getCurrentUserId(requireContext())
+
+        val audience =
+            if (currentUser == "manager") {
+                val userName = UserStore.getDisplayName(requireContext(), item.userId)
+                "For $userName"
+            } else {
+                "For you"
+            }
+
+        return "$audience • ${formatTime(item.createdAtMillis)}"
+    }
+
+    private fun actorInitial(actorName: String, actorUserId: String): String {
+        val source = actorName.ifBlank { actorUserId }.ifBlank { "C" }
+        return source.trim().first().uppercaseChar().toString()
     }
 
     private fun openTarget(item: NotificationItem) {
@@ -133,5 +194,9 @@ class NotificationsFragment : Fragment() {
 
     private fun formatTime(millis: Long): String {
         return DateFormat.format("MMM d, h:mm a", millis).toString()
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
     }
 }

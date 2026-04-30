@@ -24,6 +24,7 @@ class EventAdapter(
 
     class EventViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val vCategoryBar: View? = itemView.findViewById(R.id.vCategoryBar)
+        val vCategoryDot: View? = itemView.findViewById(R.id.vCategoryDot)
         val tvTitle: TextView = itemView.findViewById(R.id.tvEventTitle)
         val tvMeta: TextView = itemView.findViewById(R.id.tvEventMeta)
         val tvLocation: TextView = itemView.findViewById(R.id.tvEventLocation)
@@ -47,10 +48,9 @@ class EventAdapter(
         holder.tvMeta.text = "${e.category} • ${e.dateTime} • $timingStatus"
         holder.tvLocation.text = e.location ?: "No location"
 
-        holder.vCategoryBar?.let {
-            val color = CategoryColorStore.getColor(holder.itemView.context, e.category)
-            it.setBackgroundColor(color)
-        }
+        val categoryColor = CategoryColorStore.getColor(holder.itemView.context, e.category)
+        holder.vCategoryBar?.setBackgroundColor(categoryColor)
+        holder.vCategoryDot?.setBackgroundColor(categoryColor)
 
         holder.tvStatus.text = "Event: $timingStatus"
         holder.tvProgress.text = "Tasks: —"

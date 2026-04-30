@@ -1,5 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
+    <!-- Core theme -->
+    <color name="bg_main">#050B24</color>
+    <color name="bg_surface">#0E183A</color>
+    <color name="bg_surface_2">#14214A</color>
+    <color name="bg_surface_soft">#182754</color>
+
+    <!-- Accent -->
+    <color name="accent_cyan">#22D3FF</color>
+    <color name="accent_purple">#8B5CF6</color>
+    <color name="accent_purple_soft">#5B4C7C</color>
+    <color name="accent_blue">#5B8CFF</color>
+    <color name="accent_pink">#F472B6</color>
+
+    <!-- Text -->
+    <color name="text_primary">#F4F7FF</color>
+    <color name="text_secondary">#A9B6D3</color>
+    <color name="text_muted">#8190B0</color>
+    <color name="text_on_accent">#FFFFFF</color>
+
+    <!-- Lines / cards -->
+    <color name="stroke_soft">#2B437C</color>
+    <color name="stroke_bright">#3C5AA8</color>
+    <color name="card_overlay">#162449</color>
+
+    <!-- Old alias names used by earlier dashboard/notification drawables -->
+    <color name="app_bg">#050B24</color>
+    <color name="surface_1">#0E183A</color>
+    <color name="surface_2">#14214A</color>
+    <color name="surface_3">#182754</color>
+    <color name="stroke_color">#2B437C</color>
+    <color name="neon_cyan">#22D3FF</color>
+    <color name="neon_purple">#8B5CF6</color>
+    <color name="neon_purple_dark">#6D3DF0</color>
+    <color name="neon_pink">#F472B6</color>
+    <color name="success_green">#34D399</color>
+    <color name="warning_orange">#FBBF24</color>
+    <color name="danger_red">#FB7185</color>
+    <color name="bottom_nav_bg">#081126</color>
+    <color name="active_indicator">#2A214B</color>
+
+    <!-- Utility -->
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="transparent">#00000000</color>
 </resources>
