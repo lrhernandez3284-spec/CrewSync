@@ -267,14 +267,12 @@ class EventDetailActivity : AppCompatActivity() {
             }
         })
 
-        // observe tasks -> update list + progress + category list
         viewModel.tasks.observe(this) { tasks ->
             taskAdapter.submitList(tasks)
             updateProgress(tasks)
             updateCategorySpinner(tasks)
         }
 
-        // add task
         btnAddTask.setOnClickListener {
             val i = Intent(this, TaskEditActivity::class.java)
             i.putExtra("eventId", eventId)

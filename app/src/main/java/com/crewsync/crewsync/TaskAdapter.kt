@@ -62,7 +62,7 @@ class TaskAdapter(
             onToggleDone(t, checked)
         }
 
-        // creator OR manager can delete
+        // creator/ manager can delete
         val canDelete = (t.createdByUserId == currentUserId) || (currentUserId == "manager")
         holder.btnDelete.visibility = if (canDelete) View.VISIBLE else View.GONE
         holder.btnDelete.setOnClickListener { onDelete(t) }

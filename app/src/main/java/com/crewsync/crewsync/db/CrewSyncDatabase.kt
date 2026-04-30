@@ -24,8 +24,6 @@ abstract class CrewSyncDatabase : RoomDatabase() {
                     CrewSyncDatabase::class.java,
                     "crewsync_db"
                 )
-                    // dev-friendly: nukes old schema instead of migrations
-                    .fallbackToDestructiveMigration()
                     .build()
 
                 INSTANCE = instance

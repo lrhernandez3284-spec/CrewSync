@@ -30,7 +30,7 @@ class PinActivity : AppCompatActivity() {
         val mode = intent.getStringExtra(EXTRA_MODE) ?: MODE_LOGIN
         val forcedUser = intent.getStringExtra(EXTRA_TARGET_USER)
 
-        // Spinner setup
+        // Dropdown
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, users)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spUser.adapter = adapter
@@ -40,7 +40,7 @@ class PinActivity : AppCompatActivity() {
             spUser.isEnabled = false
             spUser.setSelection(users.indexOf(forcedUser).takeIf { it >= 0 } ?: 0)
         } else {
-            // Normal login: default to current user
+            // dDefault login Normal login
             val current = UserPrefs.getCurrentUserId(this)
             spUser.setSelection(users.indexOf(current).takeIf { it >= 0 } ?: 0)
         }
@@ -102,7 +102,7 @@ class PinActivity : AppCompatActivity() {
         }
 
         val userId = selectedUser()
-	val isFirstTimeSetup = !PinPrefs.hasPin(this, userId)
+        val isFirstTimeSetup = !PinPrefs.hasPin(this, userId)
 
 	tvSubtitle.text =
 	    if (mode == MODE_SWITCH) {

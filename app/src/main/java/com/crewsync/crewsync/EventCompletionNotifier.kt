@@ -45,7 +45,7 @@ object EventCompletionNotifier {
             prefs.edit().putBoolean(key(eventId), true).apply()
         }
 
-        // If someone unchecks a task later, allow a future completion notification again.
+        // If someone unchecks a task later
         if (total == 0 || done < total) {
             prefs.edit().putBoolean(key(eventId), false).apply()
         }

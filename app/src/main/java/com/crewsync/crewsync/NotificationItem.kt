@@ -5,7 +5,7 @@ data class NotificationItem(
     val userId: String,
     val actorUserId: String,
     val message: String,
-    val targetType: String, // "event" or "task"
+    val targetType: String,
     val eventId: Int,
     val taskId: Int = 0,
     val createdAtMillis: Long
