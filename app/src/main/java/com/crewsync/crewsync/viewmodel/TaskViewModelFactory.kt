@@ -1,8 +1,8 @@
-package com.example.myapplication.viewmodel
+package com.crewsync.crewsync.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.myapplication.db.TaskDao
+import com.crewsync.crewsync.db.TaskDao
 
 class TaskViewModelFactory(private val dao: TaskDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.crewsync.crewsync
 
 import android.content.Context
 import java.security.MessageDigest

@@ -1,4 +1,4 @@
-package com.example.myapplication.db
+package com.crewsync.crewsync.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*

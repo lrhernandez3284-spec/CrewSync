@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.crewsync.myapplication
 
 import org.junit.Test
 

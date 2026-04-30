@@ -1,4 +1,4 @@
-package com.example.myapplication.db
+package com.crewsync.crewsync.db
 
 import android.content.Context
 import androidx.room.Database

@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.crewsync.crewsync
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog

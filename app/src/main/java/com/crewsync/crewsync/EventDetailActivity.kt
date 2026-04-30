@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.crewsync.crewsync
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,10 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.db.CrewSyncDatabase
-import com.example.myapplication.db.Task
-import com.example.myapplication.viewmodel.TaskViewModel
-import com.example.myapplication.viewmodel.TaskViewModelFactory
+import com.crewsync.crewsync.db.CrewSyncDatabase
+import com.crewsync.crewsync.db.Task
+import com.crewsync.crewsync.viewmodel.TaskViewModel
+import com.crewsync.crewsync.viewmodel.TaskViewModelFactory
 
 class EventDetailActivity : AppCompatActivity() {
 

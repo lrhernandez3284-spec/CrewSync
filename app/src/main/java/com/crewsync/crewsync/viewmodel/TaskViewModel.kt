@@ -1,8 +1,8 @@
-package com.example.myapplication.viewmodel
+package com.crewsync.crewsync.viewmodel
 
 import androidx.lifecycle.*
-import com.example.myapplication.db.Task
-import com.example.myapplication.db.TaskDao
+import com.crewsync.crewsync.db.Task
+import com.crewsync.crewsync.db.TaskDao
 import kotlinx.coroutines.launch
 
 class TaskViewModel(private val dao: TaskDao) : ViewModel() {

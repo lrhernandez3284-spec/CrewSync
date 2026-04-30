@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.crewsync.crewsync
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
