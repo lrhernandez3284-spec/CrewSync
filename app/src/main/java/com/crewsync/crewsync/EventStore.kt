@@ -51,7 +51,8 @@ object EventStore {
             category = category,
             location = location,
             notesPreview = notesPreview,
-            dateTimeMillis = cal.timeInMillis
+            dateTimeMillis = cal.timeInMillis,
+            assignedUserIds = emptyList() // empty means default/demo event is visible to everyone
         )
     }
 
@@ -72,8 +73,15 @@ object EventStore {
         category: String,
         dateTimeMillis: Long,
         location: String?,
-        notesPreview: String?
+        notesPreview: String?,
+        assignedUserIds: List<String>
     ): Event {
+        val finalAssigned = assignedUserIds.distinct().filter { it.isNotBlank() }
+
+        require(finalAssigned.isNotEmpty()) {
+            "Event must be assigned to at least one user"
+        }
+
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
         val nextId = prefs.getInt(KEY_NEXT_ID, 1000)
@@ -84,7 +92,8 @@ object EventStore {
             category = category,
             location = location,
             notesPreview = notesPreview,
-            dateTimeMillis = dateTimeMillis
+            dateTimeMillis = dateTimeMillis,
+            assignedUserIds = finalAssigned
         )
 
         val current = getCustomEvents(context).toMutableList()
@@ -96,11 +105,10 @@ object EventStore {
             .apply()
 
         val actor = UserPrefs.getCurrentUserId(context)
-        val usersToNotify = UserStore.getUsers(context)
 
         NotificationStore.addForUsers(
             context = context,
-            userIds = usersToNotify,
+            userIds = finalAssigned,
             actorUserId = actor,
             message = "$actor created event ${event.title}",
             targetType = "event",
@@ -129,7 +137,8 @@ object EventStore {
                 enc(e.category),
                 enc(e.location ?: ""),
                 enc(e.notesPreview ?: ""),
-                (e.dateTimeMillis ?: 0L).toString()
+                (e.dateTimeMillis ?: 0L).toString(),
+                encodeUsers(e.assignedUserIds)
             ).joinToString("|")
         }
     }
@@ -140,6 +149,8 @@ object EventStore {
 
         return try {
             val millis = parts[6].toLong()
+            val assigned = if (parts.size >= 8) decodeUsers(parts[7]) else emptyList()
+
             Event(
                 id = parts[0].toInt(),
                 title = dec(parts[1]),
@@ -147,11 +158,21 @@ object EventStore {
                 category = dec(parts[3]),
                 location = dec(parts[4]).ifBlank { null },
                 notesPreview = dec(parts[5]).ifBlank { null },
-                dateTimeMillis = millis.takeIf { it > 0L }
+                dateTimeMillis = millis.takeIf { it > 0L },
+                assignedUserIds = assigned
             )
         } catch (_: Exception) {
             null
         }
+    }
+
+    private fun encodeUsers(users: List<String>): String {
+        return users.joinToString(",") { enc(it) }
+    }
+
+    private fun decodeUsers(raw: String): List<String> {
+        if (raw.isBlank()) return emptyList()
+        return raw.split(",").map { dec(it) }.filter { it.isNotBlank() }
     }
 
     private fun enc(value: String): String = Uri.encode(value)

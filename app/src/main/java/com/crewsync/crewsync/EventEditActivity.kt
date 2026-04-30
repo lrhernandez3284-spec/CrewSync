@@ -28,6 +28,8 @@ class EventEditActivity : AppCompatActivity() {
         val etTitle = findViewById<EditText>(R.id.etEventTitle)
         val spCategory = findViewById<Spinner>(R.id.spEventCategory)
         val etCustomCategory = findViewById<EditText>(R.id.etCustomCategory)
+        val listUsers = findViewById<ListView>(R.id.listEventUsers)
+        val cbSelectAll = findViewById<CheckBox>(R.id.cbSelectAllEventUsers)
         val tvDateTime = findViewById<TextView>(R.id.tvEventDateTime)
         val btnPickDateTime = findViewById<Button>(R.id.btnPickEventDateTime)
         val etLocation = findViewById<EditText>(R.id.etEventLocation)
@@ -38,9 +40,34 @@ class EventEditActivity : AppCompatActivity() {
         categories.addAll(EventRepository.getCategories(this))
         categories.add("Custom")
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spCategory.adapter = adapter
+        val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spCategory.adapter = categoryAdapter
+
+        val users = UserStore.getUsers(this).filter { it != "manager" }
+        val userAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, users)
+        listUsers.adapter = userAdapter
+        listUsers.choiceMode = ListView.CHOICE_MODE_MULTIPLE
+
+        fun updateSelectAllCheckbox() {
+            cbSelectAll.setOnCheckedChangeListener(null)
+            cbSelectAll.isChecked = users.isNotEmpty() && users.indices.all { listUsers.isItemChecked(it) }
+            cbSelectAll.setOnCheckedChangeListener { _, checked ->
+                for (i in users.indices) {
+                    listUsers.setItemChecked(i, checked)
+                }
+            }
+        }
+
+        cbSelectAll.setOnCheckedChangeListener { _, checked ->
+            for (i in users.indices) {
+                listUsers.setItemChecked(i, checked)
+            }
+        }
+
+        listUsers.setOnItemClickListener { _, _, _, _ ->
+            updateSelectAllCheckbox()
+        }
 
         tvDateTime.text = "Date/Time: ${displayFormat.format(eventMillis)}"
 
@@ -65,6 +92,16 @@ class EventEditActivity : AppCompatActivity() {
                 if (selectedCategory == "Custom") customCategory.ifBlank { "General" }
                 else selectedCategory
 
+            val assigned = mutableListOf<String>()
+            for (i in users.indices) {
+                if (listUsers.isItemChecked(i)) assigned.add(users[i])
+            }
+
+            if (assigned.isEmpty()) {
+                Toast.makeText(this, "Assign this event to at least one user", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val location = etLocation.text.toString().trim().ifBlank { null }
             val notes = etNotes.text.toString().trim().ifBlank { null }
 
@@ -74,7 +111,8 @@ class EventEditActivity : AppCompatActivity() {
                 category = category,
                 dateTimeMillis = eventMillis,
                 location = location,
-                notesPreview = notes
+                notesPreview = notes,
+                assignedUserIds = assigned
             )
 
             Toast.makeText(this, "Event created", Toast.LENGTH_SHORT).show()

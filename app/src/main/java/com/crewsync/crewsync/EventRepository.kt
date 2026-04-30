@@ -5,11 +5,19 @@ import android.content.Context
 object EventRepository {
     fun getEvents(): List<Event> = EventStore.getDefaultEvents()
 
-    fun getEvents(context: Context): List<Event> = EventStore.getEvents(context)
+    fun getEvents(context: Context): List<Event> {
+        val currentUser = UserPrefs.getCurrentUserId(context)
+
+        return EventStore.getEvents(context).filter { event ->
+            currentUser == "manager" ||
+                    event.assignedUserIds.isEmpty() ||
+                    event.assignedUserIds.contains(currentUser)
+        }
+    }
 
     fun getCategories(context: Context): List<String> = EventStore.getCategories(context)
 
     fun getEventById(context: Context, eventId: Int): Event? {
-        return getEvents(context).firstOrNull { it.id == eventId }
+        return EventStore.getEvents(context).firstOrNull { it.id == eventId }
     }
 }

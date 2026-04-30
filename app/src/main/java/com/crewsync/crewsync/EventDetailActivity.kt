@@ -54,7 +54,12 @@ class EventDetailActivity : AppCompatActivity() {
             return@registerForActivityResult
         }
 
-        val finalAssigned = if (assigned.isEmpty()) listOf(currentUserId) else assigned
+        val finalAssigned = assigned.toList()
+
+        if (finalAssigned.isEmpty()) {
+            Toast.makeText(this, "Assign this task to at least one user", Toast.LENGTH_SHORT).show()
+            return@registerForActivityResult
+        }
 
         if (taskId == 0) {
             // ADD new task

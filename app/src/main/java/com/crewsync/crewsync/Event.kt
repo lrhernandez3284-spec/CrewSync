@@ -7,5 +7,6 @@ data class Event(
     val category: String,
     val location: String?,
     val notesPreview: String?,
-    val dateTimeMillis: Long? = null
+    val dateTimeMillis: Long? = null,
+    val assignedUserIds: List<String> = emptyList()
 )
