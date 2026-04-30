@@ -18,7 +18,7 @@ class TaskEditActivity : AppCompatActivity() {
         setContentView(R.layout.activity_task_edit)
 
         val etTitle = findViewById<EditText>(R.id.etTitle)
-        val etCategory = findViewById<EditText>(R.id.etCategory)
+        val etCategory = findViewById<AutoCompleteTextView>(R.id.etCategory)
         val tvDue = findViewById<TextView>(R.id.tvDue)
         val btnPickDue = findViewById<Button>(R.id.btnPickDue)
         val btnSave = findViewById<Button>(R.id.btnSaveTask)
@@ -34,13 +34,24 @@ class TaskEditActivity : AppCompatActivity() {
         val currentUser = UserPrefs.getCurrentUserId(this)
         val isNewTask = taskId == 0
 
-        // Prefill
         etTitle.setText(intent.getStringExtra("title") ?: "")
-        etCategory.setText(intent.getStringExtra("category") ?: "")
+        etCategory.setText(intent.getStringExtra("category") ?: "", false)
+
+        val categoryAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            CategoryStore.getCategories(this)
+        )
+        etCategory.setAdapter(categoryAdapter)
+        etCategory.threshold = 0
+        etCategory.setOnClickListener { etCategory.showDropDown() }
+        etCategory.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) etCategory.showDropDown()
+        }
+
         dueMillis = intent.getLongExtra("dueDateMillis", System.currentTimeMillis())
         tvDue.text = "Due: ${formatDue(dueMillis)}"
 
-        // Users multi-select. Manager is not a normal assignee because manager already sees all tasks.
         val users = UserStore.getUsers(this).filter { it != "manager" }
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, users)
         listUsers.adapter = adapter
@@ -48,7 +59,6 @@ class TaskEditActivity : AppCompatActivity() {
 
         val preselected = intent.getStringArrayListExtra("assignedUsers") ?: arrayListOf()
 
-        // Creating a new task automatically assigns the creator, if the creator is a normal user.
         val selectedSet = preselected.toMutableSet()
         if (isNewTask && currentUser != "manager") {
             selectedSet.add(currentUser)
@@ -56,10 +66,7 @@ class TaskEditActivity : AppCompatActivity() {
 
         fun updateSelectAllCheckbox() {
             cbSelectAll.setOnCheckedChangeListener(null)
-            cbSelectAll.isChecked = users.isNotEmpty() && users.all { selected ->
-                val idx = users.indexOf(selected)
-                idx >= 0 && listUsers.isItemChecked(idx)
-            }
+            cbSelectAll.isChecked = users.isNotEmpty() && users.indices.all { listUsers.isItemChecked(it) }
             cbSelectAll.setOnCheckedChangeListener { _, checked ->
                 for (i in users.indices) {
                     listUsers.setItemChecked(i, checked)
@@ -106,7 +113,6 @@ class TaskEditActivity : AppCompatActivity() {
                 if (listUsers.isItemChecked(i)) chosen.add(users[i])
             }
 
-            // Safety: make sure creator is included on new tasks.
             if (isNewTask && currentUser != "manager" && !chosen.contains(currentUser)) {
                 chosen.add(currentUser)
             }
@@ -119,6 +125,8 @@ class TaskEditActivity : AppCompatActivity() {
                 ).show()
                 return@setOnClickListener
             }
+
+            CategoryStore.addCategory(this, category)
 
             val result = android.content.Intent()
             result.putExtra("eventId", eventId)
@@ -137,6 +145,8 @@ class TaskEditActivity : AppCompatActivity() {
 
     private fun pickDateTime(onPicked: (Long) -> Unit) {
         val cal = Calendar.getInstance()
+        cal.timeInMillis = dueMillis
+
         DatePickerDialog(
             this,
             { _, year, month, day ->

@@ -26,8 +26,7 @@ class EventEditActivity : AppCompatActivity() {
         }
 
         val etTitle = findViewById<EditText>(R.id.etEventTitle)
-        val spCategory = findViewById<Spinner>(R.id.spEventCategory)
-        val etCustomCategory = findViewById<EditText>(R.id.etCustomCategory)
+        val etCategory = findViewById<AutoCompleteTextView>(R.id.etEventCategory)
         val listUsers = findViewById<ListView>(R.id.listEventUsers)
         val cbSelectAll = findViewById<CheckBox>(R.id.cbSelectAllEventUsers)
         val tvDateTime = findViewById<TextView>(R.id.tvEventDateTime)
@@ -36,13 +35,17 @@ class EventEditActivity : AppCompatActivity() {
         val etNotes = findViewById<EditText>(R.id.etEventNotes)
         val btnSave = findViewById<Button>(R.id.btnSaveEvent)
 
-        val categories = mutableListOf<String>()
-        categories.addAll(EventRepository.getCategories(this))
-        categories.add("Custom")
-
-        val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spCategory.adapter = categoryAdapter
+        val categoryAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            CategoryStore.getCategories(this)
+        )
+        etCategory.setAdapter(categoryAdapter)
+        etCategory.threshold = 0
+        etCategory.setOnClickListener { etCategory.showDropDown() }
+        etCategory.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) etCategory.showDropDown()
+        }
 
         val users = UserStore.getUsers(this).filter { it != "manager" }
         val userAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, users)
@@ -85,12 +88,7 @@ class EventEditActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val selectedCategory = spCategory.selectedItem?.toString() ?: "General"
-            val customCategory = etCustomCategory.text.toString().trim()
-
-            val category =
-                if (selectedCategory == "Custom") customCategory.ifBlank { "General" }
-                else selectedCategory
+            val category = etCategory.text.toString().trim().ifBlank { "General" }
 
             val assigned = mutableListOf<String>()
             for (i in users.indices) {
@@ -101,6 +99,8 @@ class EventEditActivity : AppCompatActivity() {
                 Toast.makeText(this, "Assign this event to at least one user", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            CategoryStore.addCategory(this, category)
 
             val location = etLocation.text.toString().trim().ifBlank { null }
             val notes = etNotes.text.toString().trim().ifBlank { null }

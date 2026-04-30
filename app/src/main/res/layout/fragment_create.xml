@@ -50,7 +50,7 @@
         android:id="@+id/btnCreateEvent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Create Event (placeholder)"
+        android:text="Create Event"
         android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/btnCreateTask"
         app:layout_constraintStart_toStartOf="parent"

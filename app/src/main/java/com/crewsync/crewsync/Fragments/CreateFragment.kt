@@ -119,6 +119,13 @@ class CreateFragment : Fragment() {
 
         refreshEvents()
 
+        val currentUser = UserPrefs.getCurrentUserId(requireContext())
+        if (currentUser != "manager") {
+            btnCreateEvent.visibility = View.GONE
+        } else {
+            btnCreateEvent.visibility = View.VISIBLE
+        }
+
         btnCreateTask.setOnClickListener {
             val idx = spEvent.selectedItemPosition
             if (idx < 0 || idx >= events.size) {
