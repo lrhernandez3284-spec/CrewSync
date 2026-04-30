@@ -1,0 +1,2412 @@
+===== CREWSYNC SNAPSHOT =====
+DATE: Wed Apr 29 23:09:44 MDT 2026
+PWD: /mnt/c/Users/Owner/AndroidStudioProjects/CrewSync
+
+===== GIT =====
+On branch fix/issue-2-applicationid
+Your branch is up to date with 'origin/fix/issue-2-applicationid'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	crewsync_snapshot_20260429_230944.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+fix/issue-2-applicationid
+
+6ecba61 Add manager user management: add/delete users and reset PINs
+aa862c6 Improve Create tab: pick event then create task; share events via EventRepository
+118e94f Fix #2: use unique applicationId/namespace to prevent emulator mixing apps
+b7045c9 Fix #2: use unique applicationId/namespace to prevent emulator mixing apps
+b8a1fc0 Implement tasks with Room, per-user PIN auth, reminders
+
+===== TREE (depth 4) =====
+.
+├── app
+│   ├── build
+│   │   ├── generated
+│   │   │   ├── ksp
+│   │   │   ├── res
+│   │   │   └── updated_navigation_xml
+│   │   ├── intermediates
+│   │   │   ├── aar_metadata_check
+│   │   │   ├── android_res_source_set_path_map
+│   │   │   ├── annotation_processor_list
+│   │   │   ├── apk
+│   │   │   ├── apk_ide_redirect_file
+│   │   │   ├── app_metadata
+│   │   │   ├── assets
+│   │   │   ├── built_in_kotlinc
+│   │   │   ├── compatible_screen_manifest
+│   │   │   ├── compile_and_runtime_r_class_jar
+│   │   │   ├── compile_r_class_jar
+│   │   │   ├── compile_symbol_list
+│   │   │   ├── compiled_navigation_res
+│   │   │   ├── compressed_assets
+│   │   │   ├── data_binding_layout_info_type_merge
+│   │   │   ├── data_binding_layout_info_type_package
+│   │   │   ├── desugar_graph
+│   │   │   ├── dex
+│   │   │   ├── dex_archive_input_jar_hashes
+│   │   │   ├── dex_number_of_buckets_file
+│   │   │   ├── duplicate_classes_check
+│   │   │   ├── external_file_lib_dex_archives
+│   │   │   ├── external_libs_dex_archive
+│   │   │   ├── external_libs_dex_archive_with_artifact_transforms
+│   │   │   ├── incremental
+│   │   │   ├── java_res
+│   │   │   ├── linked_resources_binary_format
+│   │   │   ├── local_only_symbol_list
+│   │   │   ├── manifest_merge_blame_file
+│   │   │   ├── merged_java_res
+│   │   │   ├── merged_jni_libs
+│   │   │   ├── merged_manifest
+│   │   │   ├── merged_manifests
+│   │   │   ├── merged_res
+│   │   │   ├── merged_res_blame_folder
+│   │   │   ├── mixed_scope_dex_archive
+│   │   │   ├── navigation_json
+│   │   │   ├── nested_resources_validation_report
+│   │   │   ├── packaged_manifests
+│   │   │   ├── packaged_res
+│   │   │   ├── project_dex_archive
+│   │   │   ├── runtime_symbol_list
+│   │   │   ├── signing_config_versions
+│   │   │   ├── stable_resource_ids_file
+│   │   │   ├── sub_project_dex_archive
+│   │   │   ├── symbol_list_with_package_name
+│   │   │   └── validate_signing_config
+│   │   ├── kotlin
+│   │   │   └── compileDebugKotlin
+│   │   ├── kspCaches
+│   │   │   └── debug
+│   │   └── outputs
+│   │       └── logs
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── src
+│       ├── androidTest
+│       │   └── java
+│       ├── main
+│       │   ├── AndroidManifest.xml
+│       │   ├── java
+│       │   └── res
+│       └── test
+│           └── java
+├── build.gradle.kts
+├── crewsync_snapshot_20260429_230944.txt
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── local.properties
+└── settings.gradle.kts
+
+71 directories, 13 files
+
+===== GRADLE FILES =====
+--- build.gradle.kts (root) ---
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    alias(libs.plugins.android.application) apply false
+    id("com.google.devtools.ksp") version "2.3.4" apply false
+}
+
+--- settings.gradle.kts ---
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "My Application"
+include(":app")
+
+--- app/build.gradle.kts ---
+plugins {
+    alias(libs.plugins.android.application)
+    id("com.google.devtools.ksp")
+}
+
+android {
+    namespace = "com.crewsync.crewsync"
+    compileSdk {
+        version = release(36)
+    }
+
+    defaultConfig {
+        applicationId = "com.lrhernandez.crewsync"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+    // Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+
+// Lifecycle (ViewModel + LiveData)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+
+// Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    val room_version = "2.8.4"
+    val lifecycle_version = "2.10.0"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version")
+}
+
+--- gradle/libs.versions.toml ---
+[versions]
+agp = "9.0.1"
+coreKtx = "1.17.0"
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+appcompat = "1.7.1"
+material = "1.13.0"
+activity = "1.12.4"
+constraintlayout = "2.2.1"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+
+
+===== MANIFEST =====
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyApplication">
+
+        <activity
+            android:name=".PinActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".EventDetailActivity" />
+	<activity android:name=".TaskEditActivity" />
+	<receiver
+	    android:name=".ReminderReceiver"
+    	    android:exported="false" />
+	<activity android:name=".UserManagerActivity" />
+    </application>
+
+</manifest>
+
+===== KOTLIN SOURCE (ALL .kt) =====
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/Event.kt -----
+package com.crewsync.crewsync
+
+data class Event(
+    val id: Int,
+    val title: String,
+    val dateTime: String,
+    val category: String,
+    val location: String?,
+    val notesPreview: String?
+)
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/EventAdapter.kt -----
+package com.crewsync.crewsync
+
+import android.content.Intent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+
+class EventAdapter(private val events: List<Event>) :
+    RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
+
+    class EventViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvTitle: TextView = itemView.findViewById(R.id.tvEventTitle)
+        val tvMeta: TextView = itemView.findViewById(R.id.tvEventMeta)
+        val tvLocation: TextView = itemView.findViewById(R.id.tvEventLocation)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_event, parent, false)
+        return EventViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
+        val e = events[position]
+        holder.tvTitle.text = e.title
+        holder.tvMeta.text = "${e.category} • ${e.dateTime}"
+        holder.tvLocation.text = e.location ?: "No location"
+
+        holder.itemView.setOnClickListener {
+            val intent = Intent(holder.itemView.context, EventDetailActivity::class.java)
+	    intent.putExtra("eventId", e.id)
+            intent.putExtra("title", e.title)
+            intent.putExtra("dateTime", e.dateTime)
+            intent.putExtra("category", e.category)
+            intent.putExtra("location", e.location)
+            intent.putExtra("notesPreview", e.notesPreview)
+            holder.itemView.context.startActivity(intent)
+        }
+    }
+
+    override fun getItemCount(): Int = events.size
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/EventDetailActivity.kt -----
+package com.crewsync.crewsync
+
+import android.content.Intent
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.crewsync.crewsync.db.CrewSyncDatabase
+import com.crewsync.crewsync.db.Task
+import com.crewsync.crewsync.viewmodel.TaskViewModel
+import com.crewsync.crewsync.viewmodel.TaskViewModelFactory
+
+class EventDetailActivity : AppCompatActivity() {
+
+    private lateinit var viewModel: TaskViewModel
+    private lateinit var taskAdapter: TaskAdapter
+
+    private var eventId: Int = -1
+    private lateinit var currentUserId: String
+
+    private lateinit var tvProgress: TextView
+    private lateinit var etSearch: EditText
+    private lateinit var spCategory: Spinner
+
+    private var currentCategory: String = "All"
+
+    private val taskEditLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != RESULT_OK) return@registerForActivityResult
+        val data = result.data ?: return@registerForActivityResult
+
+        val returnedEventId = data.getIntExtra("eventId", -1)
+        if (returnedEventId != eventId) return@registerForActivityResult
+
+        val taskId = data.getIntExtra("taskId", 0)
+        val title = data.getStringExtra("title") ?: ""
+        val category = data.getStringExtra("category") ?: "General"
+        val dueMillis = data.getLongExtra("dueDateMillis", System.currentTimeMillis())
+
+        if (title.isBlank()) {
+            Toast.makeText(this, "Task title required", Toast.LENGTH_SHORT).show()
+            return@registerForActivityResult
+        }
+
+        if (taskId == 0) {
+            // ADD new task
+            val newTask = Task(
+                taskId = 0,
+                eventId = eventId,
+                title = title,
+                category = category,
+                dueDateMillis = dueMillis,
+                isDone = false,
+                createdByUserId = currentUserId
+            )
+            viewModel.insertWithCallback(newTask) { newId ->
+ 	        ReminderScheduler.schedule(this, newId, newTask.title, newTask.dueDateMillis)
+	    }
+
+        } else {
+            // EDIT existing task
+            val isDone = data.getBooleanExtra("isDone", false)
+            val createdBy = data.getStringExtra("createdByUserId") ?: currentUserId
+
+            val editedTask = Task(
+                taskId = taskId,
+                eventId = eventId,
+                title = title,
+                category = category,
+                dueDateMillis = dueMillis,
+                isDone = isDone,
+                createdByUserId = createdBy
+            )
+            viewModel.update(editedTask)
+
+            ReminderScheduler.schedule(this, editedTask.taskId, editedTask.title, editedTask.dueDateMillis)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_event_detail)
+
+        // ---- event header ----
+        eventId = intent.getIntExtra("eventId", -1)
+
+        val tvTitle = findViewById<TextView>(R.id.tvTitle)
+        val tvMeta = findViewById<TextView>(R.id.tvMeta)
+        val tvLocation = findViewById<TextView>(R.id.tvLocation)
+        val tvNotes = findViewById<TextView>(R.id.tvNotes)
+
+        tvTitle.text = intent.getStringExtra("title") ?: ""
+        tvMeta.text = "${intent.getStringExtra("category") ?: ""} • ${intent.getStringExtra("dateTime") ?: ""}"
+        tvLocation.text = intent.getStringExtra("location") ?: "No location"
+        tvNotes.text = intent.getStringExtra("notesPreview") ?: "No notes"
+
+        // ---- tasks UI ----
+        currentUserId = UserPrefs.getCurrentUserId(this)
+
+        tvProgress = findViewById(R.id.tvProgress)
+        etSearch = findViewById(R.id.etSearch)
+        spCategory = findViewById(R.id.spCategory)
+        val btnAddTask = findViewById<Button>(R.id.btnAddTask)
+
+        val rclTasks = findViewById<RecyclerView>(R.id.rclTasks)
+        rclTasks.layoutManager = LinearLayoutManager(this)
+
+        taskAdapter = TaskAdapter(
+            currentUserId = currentUserId,
+            onToggleDone = { task, checked ->
+                viewModel.update(task.copy(isDone = checked))
+            },
+            onDelete = { task ->
+                viewModel.deleteIfCreator(task.taskId, currentUserId)
+                ReminderScheduler.cancel(this, task.taskId)
+            },
+            onEdit = { task ->
+                val i = Intent(this, TaskEditActivity::class.java)
+                i.putExtra("eventId", eventId)
+                i.putExtra("taskId", task.taskId)
+                i.putExtra("title", task.title)
+                i.putExtra("category", task.category)
+                i.putExtra("dueDateMillis", task.dueDateMillis)
+                i.putExtra("isDone", task.isDone)
+                i.putExtra("createdByUserId", task.createdByUserId)
+                taskEditLauncher.launch(i)
+            }
+        )
+        rclTasks.adapter = taskAdapter
+
+        // ---- ViewModel init (Room demo style) ----
+        val dao = CrewSyncDatabase.getInstance(this).taskDao()
+        val factory = TaskViewModelFactory(dao)
+        viewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
+
+        viewModel.setEventId(eventId)
+
+        // observe tasks -> update list + progress + category list
+        viewModel.tasks.observe(this) { tasks ->
+            taskAdapter.submitList(tasks)
+            updateProgress(tasks)
+            updateCategorySpinner(tasks)
+        }
+
+        // add task
+        btnAddTask.setOnClickListener {
+            val i = Intent(this, TaskEditActivity::class.java)
+            i.putExtra("eventId", eventId)
+            i.putExtra("taskId", 0)
+            taskEditLauncher.launch(i)
+        }
+
+        // search text
+        etSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.setQuery(s?.toString() ?: "")
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        // category selection
+        spCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, pos: Int, id: Long) {
+                currentCategory = parent?.getItemAtPosition(pos)?.toString() ?: "All"
+                viewModel.setCategory(currentCategory)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun updateProgress(tasks: List<Task>) {
+        val total = tasks.size
+        val done = tasks.count { it.isDone }
+        val percent = if (total == 0) 0 else (done * 100 / total)
+        tvProgress.text = "Progress: $percent% ($done/$total)"
+    }
+
+    private fun updateCategorySpinner(tasks: List<Task>) {
+        val categories = mutableListOf("All")
+        categories.addAll(tasks.map { it.category }.distinct().sorted())
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spCategory.adapter = adapter
+
+        val idx = categories.indexOf(currentCategory).takeIf { it >= 0 } ?: 0
+        spCategory.setSelection(idx)
+    }
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/EventRepository.kt -----
+package com.crewsync.crewsync
+
+object EventRepository {
+    fun getEvents(): List<Event> = listOf(
+        Event(1, "Rehearsal - Setlist Run", "Mon 7:00 PM", "Rehearsal", "Garage Studio", "Practice intros + transitions"),
+        Event(2, "Gig @ Calakas Raza", "Sat 9:00 PM", "Performance", "Downtown", "Arrive early, soundcheck 8:15"),
+        Event(3, "Team Meeting", "Wed 5:30 PM", "Meeting", "Coffee shop", null),
+        Event(4, "Personal: Replace Strings", "Thu 6:00 PM", "Personal", null, "NYXL set + tune stability check"),
+        Event(5, "Photo/Promo Content", "Sun 2:00 PM", "Content", "Home", "Record 3 clips for TikTok")
+    )
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/Fragments/CalanderFragment.kt -----
+package com.crewsync.crewsync
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class CalendarFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_calendar, container, false)
+    }
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/Fragments/CreateFragment.kt -----
+package com.crewsync.crewsync.Fragments
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Spinner
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.crewsync.crewsync.EventRepository
+import com.crewsync.crewsync.R
+import com.crewsync.crewsync.TaskEditActivity
+
+class CreateFragment : Fragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val view = inflater.inflate(R.layout.fragment_create, container, false)
+
+        val spEvent = view.findViewById<Spinner>(R.id.spEvent)
+        val btnCreateTask = view.findViewById<Button>(R.id.btnCreateTask)
+        val btnCreateEvent = view.findViewById<Button>(R.id.btnCreateEvent)
+
+        val events = EventRepository.getEvents()
+        val titles = events.map { "${it.title} (${it.category})" }
+
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, titles)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spEvent.adapter = adapter
+
+        btnCreateTask.setOnClickListener {
+            val idx = spEvent.selectedItemPosition
+            if (idx < 0 || idx >= events.size) {
+                Toast.makeText(requireContext(), "Select an event first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val selectedEvent = events[idx]
+            val i = Intent(requireContext(), TaskEditActivity::class.java)
+            i.putExtra("eventId", selectedEvent.id)
+            i.putExtra("taskId", 0)
+            startActivity(i)
+        }
+
+        btnCreateEvent.setOnClickListener {
+            Toast.makeText(requireContext(), "Create Event coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        return view
+    }
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/Fragments/DashboardFragment.kt -----
+package com.crewsync.crewsync.Fragments
+
+import android.content.Intent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.crewsync.crewsync.EventAdapter
+import com.crewsync.crewsync.EventRepository
+import com.crewsync.crewsync.PinActivity
+import com.crewsync.crewsync.R
+import com.crewsync.crewsync.UserPrefs
+import com.crewsync.crewsync.UserStore
+
+class DashboardFragment : Fragment() {
+
+    private var suppressSpinnerCallback = false
+    private lateinit var spUser: Spinner
+
+    private val switchUserLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (!this::spUser.isInitialized) return@registerForActivityResult
+
+            val users = UserStore.getUsers(requireContext())
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                val user = result.data?.getStringExtra(PinActivity.RESULT_USER) ?: return@registerForActivityResult
+                UserPrefs.setCurrentUserId(requireContext(), user)
+                Toast.makeText(requireContext(), "Switched to $user", Toast.LENGTH_SHORT).show()
+
+                suppressSpinnerCallback = true
+                spUser.setSelection(users.indexOf(user).takeIf { it >= 0 } ?: 0)
+                suppressSpinnerCallback = false
+            } else {
+                val current = UserPrefs.getCurrentUserId(requireContext())
+                suppressSpinnerCallback = true
+                spUser.setSelection(users.indexOf(current).takeIf { it >= 0 } ?: 0)
+                suppressSpinnerCallback = false
+            }
+        }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: android.os.Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
+
+        spUser = view.findViewById(R.id.spUser)
+        val rcl = view.findViewById<RecyclerView>(R.id.rclEvents)
+
+        // Setup users spinner
+        val users = UserStore.getUsers(requireContext())
+        val userAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, users)
+        userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spUser.adapter = userAdapter
+
+        val current = UserPrefs.getCurrentUserId(requireContext())
+        spUser.setSelection(users.indexOf(current).takeIf { it >= 0 } ?: 0)
+
+        spUser.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                if (suppressSpinnerCallback) return
+                val chosen = users[pos]
+                val cur = UserPrefs.getCurrentUserId(requireContext())
+                if (chosen == cur) return
+
+                val i = Intent(requireContext(), PinActivity::class.java)
+                i.putExtra(PinActivity.EXTRA_MODE, PinActivity.MODE_SWITCH)
+                i.putExtra(PinActivity.EXTRA_TARGET_USER, chosen)
+                switchUserLauncher.launch(i)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Events list
+        rcl.layoutManager = LinearLayoutManager(requireContext())
+        rcl.adapter = EventAdapter(EventRepository.getEvents())
+
+        return view
+    }
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/Fragments/NotificationsFragment.kt -----
+package com.crewsync.crewsync
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class NotificationsFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_notifications, container, false)
+    }
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/Fragments/SettingsFragment.kt -----
+package com.crewsync.crewsync.Fragments
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.crewsync.crewsync.R
+import com.crewsync.crewsync.UserManagerActivity
+import com.crewsync.crewsync.UserPrefs
+
+class SettingsFragment : Fragment() {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_settings, container, false)
+
+        val tv = view.findViewById<TextView>(R.id.tvCurrentUser)
+        val btn = view.findViewById<Button>(R.id.btnManageUsers)
+
+        val current = UserPrefs.getCurrentUserId(requireContext())
+        tv.text = "Current user: $current"
+
+        btn.setOnClickListener {
+            if (current != "manager") {
+                Toast.makeText(requireContext(), "Manager only", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            startActivity(Intent(requireContext(), UserManagerActivity::class.java))
+        }
+
+        return view
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/MainActivity.kt -----
+package com.crewsync.crewsync
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.crewsync.crewsync.Fragments.CreateFragment
+import com.crewsync.crewsync.Fragments.SettingsFragment
+import com.crewsync.crewsync.Fragments.DashboardFragment
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val bottom = findViewById<BottomNavigationView>(R.id.bottomNav)
+
+        // default tab
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.main_fragment_container, DashboardFragment())
+                .commit()
+        }
+
+        bottom.setOnItemSelectedListener { item ->
+            val frag = when (item.itemId) {
+                R.id.nav_dashboard -> DashboardFragment()
+                R.id.nav_calendar -> CalendarFragment()
+                R.id.nav_create -> CreateFragment()
+                R.id.nav_notifications -> NotificationsFragment()
+                R.id.nav_settings -> SettingsFragment()
+                else -> DashboardFragment()
+            }
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.main_fragment_container, frag)
+                .commit()
+            true
+        }
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/PinActivity.kt -----
+package com.crewsync.crewsync
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+
+class PinActivity : AppCompatActivity() {
+
+    companion object {
+        const val EXTRA_MODE = "mode"
+        const val MODE_LOGIN = "login"
+        const val MODE_SWITCH = "switch"
+
+        const val EXTRA_TARGET_USER = "target_user"
+        const val RESULT_USER = "result_user"
+    }
+
+    private val users: List<String> by lazy { UserStore.getUsers(this) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_pin)
+
+        val tvSubtitle = findViewById<TextView>(R.id.tvSubtitle)
+        val spUser = findViewById<Spinner>(R.id.spUser)
+        val etPin = findViewById<EditText>(R.id.etPin)
+        val btnContinue = findViewById<Button>(R.id.btnContinue)
+
+        val mode = intent.getStringExtra(EXTRA_MODE) ?: MODE_LOGIN
+        val forcedUser = intent.getStringExtra(EXTRA_TARGET_USER)
+
+        // Spinner setup
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, users)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spUser.adapter = adapter
+
+        if (mode == MODE_SWITCH && forcedUser != null) {
+            // Switching: user is fixed
+            spUser.isEnabled = false
+            spUser.setSelection(users.indexOf(forcedUser).takeIf { it >= 0 } ?: 0)
+        } else {
+            // Normal login: default to current user
+            val current = UserPrefs.getCurrentUserId(this)
+            spUser.setSelection(users.indexOf(current).takeIf { it >= 0 } ?: 0)
+        }
+
+        fun selectedUser(): String {
+            return if (mode == MODE_SWITCH && forcedUser != null) forcedUser
+            else spUser.selectedItem.toString()
+        }
+
+        fun refreshSubtitle() {
+            val userId = selectedUser()
+            val isFirstTimeSetup = !PinPrefs.hasPin(this, userId)
+            tvSubtitle.text = if (isFirstTimeSetup) "Create PIN for $userId" else "Enter PIN for $userId"
+        }
+
+        refreshSubtitle()
+
+        spUser.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, pos: Int, id: Long) {
+                refreshSubtitle()
+                etPin.text.clear()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        btnContinue.setOnClickListener {
+            val userId = selectedUser()
+            val pin = etPin.text.toString().trim()
+
+            if (pin.length < 4) {
+                Toast.makeText(this, "PIN must be at least 4 digits", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val isFirstTimeSetup = !PinPrefs.hasPin(this, userId)
+
+            if (isFirstTimeSetup) {
+                PinPrefs.savePin(this, userId, pin)
+                Toast.makeText(this, "PIN set for $userId!", Toast.LENGTH_SHORT).show()
+            } else {
+                if (!PinPrefs.verifyPin(this, userId, pin)) {
+                    Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
+                    etPin.text.clear()
+                    return@setOnClickListener
+                }
+            }
+
+            // success:
+            if (mode == MODE_SWITCH) {
+                val result = Intent()
+                result.putExtra(RESULT_USER, userId)
+                setResult(RESULT_OK, result)
+                finish()
+            } else {
+                UserPrefs.setCurrentUserId(this, userId)
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            }
+        }
+
+        val userId = selectedUser()
+	val isFirstTimeSetup = !PinPrefs.hasPin(this, userId)
+
+	tvSubtitle.text =
+	    if (mode == MODE_SWITCH) {
+	        if (isFirstTimeSetup) "Create PIN to switch to $userId"
+	        else "Authenticate to switch to $userId"
+	    } else {
+	        if (isFirstTimeSetup) "Create PIN for $userId"
+	        else "Enter PIN for $userId"
+        }
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/PinPrefs.kt -----
+package com.crewsync.crewsync
+
+import android.content.Context
+import java.security.MessageDigest
+
+object PinPrefs {
+    private const val PREFS_NAME = "crewsync_prefs"
+    private const val KEY_PIN_HASH_PREFIX = "pin_hash_"
+
+    private fun keyForUser(userId: String): String = KEY_PIN_HASH_PREFIX + userId
+
+    fun hasPin(context: Context, userId: String): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.contains(keyForUser(userId))
+    }
+
+    fun savePin(context: Context, userId: String, pin: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(keyForUser(userId), sha256(pin)).apply()
+    }
+
+    fun verifyPin(context: Context, userId: String, pin: String): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val stored = prefs.getString(keyForUser(userId), null) ?: return false
+        return stored == sha256(pin)
+    }
+
+    private fun sha256(text: String): String {
+        val md = MessageDigest.getInstance("SHA-256")
+        val bytes = md.digest(text.toByteArray(Charsets.UTF_8))
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
+
+    fun resetPin(context: Context, userId: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().remove(keyForUser(userId)).apply()
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/ReminderReceiver.kt -----
+package com.crewsync.crewsync
+
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
+
+class ReminderReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val taskTitle = intent.getStringExtra(EXTRA_TASK_TITLE) ?: "Task"
+        val taskId = intent.getIntExtra(EXTRA_TASK_ID, 0)
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create channel (Android 8+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "CrewSync Reminders",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            manager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // simple built-in icon
+            .setContentTitle("Task due tomorrow")
+            .setContentText(taskTitle)
+            .setAutoCancel(true)
+            .build()
+
+        manager.notify(taskId, notification)
+    }
+
+    companion object {
+        const val CHANNEL_ID = "crewsync_reminders"
+        const val EXTRA_TASK_ID = "task_id"
+        const val EXTRA_TASK_TITLE = "task_title"
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/ReminderScheduler.kt -----
+package com.crewsync.crewsync
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+
+object ReminderScheduler {
+
+    private const val ONE_DAY_MS = 24 * 60 * 60 * 1000L
+
+    fun schedule(context: Context, taskId: Int, taskTitle: String, dueDateMillis: Long) {
+        val reminderAt = dueDateMillis - ONE_DAY_MS
+        val triggerAt = if (reminderAt < System.currentTimeMillis()) {
+            // If it's already within a day, trigger soon (or you could skip)
+            System.currentTimeMillis() + 5_000L
+        } else reminderAt
+
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, ReminderReceiver::class.java).apply {
+            putExtra(ReminderReceiver.EXTRA_TASK_ID, taskId)
+            putExtra(ReminderReceiver.EXTRA_TASK_TITLE, taskTitle)
+        }
+
+        val pending = PendingIntent.getBroadcast(
+            context,
+            taskId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
+    }
+
+    fun cancel(context: Context, taskId: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, ReminderReceiver::class.java)
+        val pending = PendingIntent.getBroadcast(
+            context,
+            taskId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.cancel(pending)
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/TaskAdapter.kt -----
+package com.crewsync.crewsync
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.crewsync.crewsync.db.Task
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+class TaskAdapter(
+    private val currentUserId: String,
+    private val onToggleDone: (Task, Boolean) -> Unit,
+    private val onDelete: (Task) -> Unit,
+    private val onEdit: (Task) -> Unit
+) : RecyclerView.Adapter<TaskAdapter.TaskVH>() {
+
+    private var items: List<Task> = emptyList()
+
+    fun submitList(newList: List<Task>) {
+        items = newList
+        notifyDataSetChanged()
+    }
+
+    class TaskVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val cbDone: CheckBox = itemView.findViewById(R.id.cbDone)
+        val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
+        val tvMeta: TextView = itemView.findViewById(R.id.tvTaskMeta)
+        val btnDelete: Button = itemView.findViewById(R.id.btnDelete)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskVH {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task, parent, false)
+        return TaskVH(view)
+    }
+
+    override fun onBindViewHolder(holder: TaskVH, position: Int) {
+        val t = items[position]
+
+        holder.tvTitle.text = t.title
+
+        val sdf = SimpleDateFormat("MMM d, h:mm a", Locale.US)
+        val due = sdf.format(Date(t.dueDateMillis))
+
+        val isOverdue = !t.isDone && t.dueDateMillis < System.currentTimeMillis()
+        val overdueTag = if (isOverdue) " • OVERDUE" else ""
+
+        holder.tvMeta.text = "${t.category} • Due $due$overdueTag"
+
+        // checkbox
+        holder.cbDone.setOnCheckedChangeListener(null)
+        holder.cbDone.isChecked = t.isDone
+        holder.cbDone.setOnCheckedChangeListener { _, checked ->
+            onToggleDone(t, checked)
+        }
+
+        // creator-only delete button
+        holder.btnDelete.visibility = if (t.createdByUserId == currentUserId) View.VISIBLE else View.GONE
+        holder.btnDelete.setOnClickListener { onDelete(t) }
+
+        // tap row to edit
+        holder.itemView.setOnClickListener { onEdit(t) }
+    }
+
+    override fun getItemCount(): Int = items.size
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/TaskEditActivity.kt -----
+package com.crewsync.crewsync
+
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+
+class TaskEditActivity : AppCompatActivity() {
+
+    private var dueMillis: Long = System.currentTimeMillis()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_task_edit)
+
+        val etTitle = findViewById<EditText>(R.id.etTitle)
+        val etCategory = findViewById<EditText>(R.id.etCategory)
+        val tvDue = findViewById<TextView>(R.id.tvDue)
+        val btnPickDue = findViewById<Button>(R.id.btnPickDue)
+        val btnSave = findViewById<Button>(R.id.btnSaveTask)
+
+        val eventId = intent.getIntExtra("eventId", -1)
+        val taskId = intent.getIntExtra("taskId", 0)
+
+        // prefill if editing
+        etTitle.setText(intent.getStringExtra("title") ?: "")
+        etCategory.setText(intent.getStringExtra("category") ?: "")
+        dueMillis = intent.getLongExtra("dueDateMillis", System.currentTimeMillis())
+        tvDue.text = "Due: ${formatDue(dueMillis)}"
+
+        btnPickDue.setOnClickListener {
+            pickDateTime { picked ->
+                dueMillis = picked
+                tvDue.text = "Due: ${formatDue(dueMillis)}"
+            }
+        }
+
+        btnSave.setOnClickListener {
+            val title = etTitle.text.toString().trim()
+            val category = etCategory.text.toString().trim().ifBlank { "General" }
+
+            // Send result back to EventDetailActivity
+            val result = android.content.Intent()
+	    result.putExtra("eventId", eventId)
+	    result.putExtra("taskId", taskId)
+	    result.putExtra("title", title)
+	    result.putExtra("category", category)
+	    result.putExtra("dueDateMillis", dueMillis)
+
+            setResult(RESULT_OK, result)
+            finish()
+        }
+    }
+
+    private fun pickDateTime(onPicked: (Long) -> Unit) {
+        val cal = Calendar.getInstance()
+        DatePickerDialog(this,
+            { _, year, month, day ->
+                cal.set(Calendar.YEAR, year)
+                cal.set(Calendar.MONTH, month)
+                cal.set(Calendar.DAY_OF_MONTH, day)
+
+                TimePickerDialog(this,
+                    { _, hour, minute ->
+                        cal.set(Calendar.HOUR_OF_DAY, hour)
+                        cal.set(Calendar.MINUTE, minute)
+                        cal.set(Calendar.SECOND, 0)
+                        onPicked(cal.timeInMillis)
+                    },
+                    cal.get(Calendar.HOUR_OF_DAY),
+                    cal.get(Calendar.MINUTE),
+                    false
+                ).show()
+            },
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
+    private fun formatDue(millis: Long): String {
+        val sdf = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.US)
+        return sdf.format(millis)
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/UserManagerActivity.kt -----
+package com.crewsync.crewsync
+
+import android.os.Bundle
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+
+class UserManagerActivity : AppCompatActivity() {
+
+    private lateinit var adapter: ArrayAdapter<String>
+    private var users: MutableList<String> = mutableListOf()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_user_manager)
+
+        val current = UserPrefs.getCurrentUserId(this)
+        if (current != "manager") {
+            Toast.makeText(this, "Manager only", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        val etNewUser = findViewById<EditText>(R.id.etNewUser)
+        val btnAdd = findViewById<Button>(R.id.btnAddUser)
+        val list = findViewById<ListView>(R.id.listUsers)
+
+        fun refresh() {
+            users = UserStore.getUsers(this).toMutableList()
+            adapter.clear()
+            adapter.addAll(users)
+            adapter.notifyDataSetChanged()
+        }
+
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, mutableListOf())
+        list.adapter = adapter
+        refresh()
+
+        btnAdd.setOnClickListener {
+            val newId = etNewUser.text.toString()
+            val ok = UserStore.addUser(this, newId)
+            if (!ok) {
+                Toast.makeText(this, "Invalid or existing user id", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "User added", Toast.LENGTH_SHORT).show()
+                etNewUser.text.clear()
+                refresh()
+            }
+        }
+
+        list.setOnItemClickListener { _, _, pos, _ ->
+            val userId = users[pos]
+            if (userId == "manager") {
+                Toast.makeText(this, "Cannot modify manager", Toast.LENGTH_SHORT).show()
+                return@setOnItemClickListener
+            }
+
+            val options = arrayOf("Reset PIN", "Delete User")
+            AlertDialog.Builder(this)
+                .setTitle("Manage: $userId")
+                .setItems(options) { _, which ->
+                    when (which) {
+                        0 -> {
+                            PinPrefs.resetPin(this, userId)
+                            Toast.makeText(this, "PIN reset for $userId", Toast.LENGTH_SHORT).show()
+                        }
+                        1 -> {
+                            UserStore.removeUser(this, userId)
+                            PinPrefs.resetPin(this, userId)
+                            Toast.makeText(this, "Deleted $userId", Toast.LENGTH_SHORT).show()
+                            refresh()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/UserPrefs.kt -----
+package com.crewsync.crewsync
+
+import android.content.Context
+
+object UserPrefs {
+    private const val PREFS_NAME = "crewsync_prefs"
+    private const val KEY_USER = "current_user"
+
+    fun getCurrentUserId(context: Context): String {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_USER, "luis") ?: "luis"
+    }
+
+    fun setCurrentUserId(context: Context, userId: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_USER, userId).apply()
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/UserStore.kt -----
+package com.crewsync.crewsync
+
+import android.content.Context
+
+object UserStore {
+    private const val PREFS_NAME = "crewsync_prefs"
+    private const val KEY_USERS = "users_set"
+
+    private val defaultUsers = setOf("manager", "luis", "mike", "guest")
+
+    fun getUsers(context: Context): List<String> {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val set = prefs.getStringSet(KEY_USERS, null) ?: defaultUsers
+
+        // ensure manager always exists and normalize
+        val normalized = (set + "manager")
+            .map { it.trim().lowercase() }
+            .filter { it.isNotBlank() }
+            .toSet()
+
+        // initialize store if missing
+        if (prefs.getStringSet(KEY_USERS, null) == null) {
+            prefs.edit().putStringSet(KEY_USERS, normalized).apply()
+        }
+
+        return normalized.toList().sorted()
+    }
+
+    fun addUser(context: Context, userId: String): Boolean {
+        val id = userId.trim().lowercase()
+        if (id.isBlank()) return false
+        if (!id.matches(Regex("^[a-z0-9_]{3,20}$"))) return false
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val current = (prefs.getStringSet(KEY_USERS, defaultUsers) ?: defaultUsers).toMutableSet()
+        val added = current.add(id)
+
+        // ensure manager always exists
+        current.add("manager")
+        prefs.edit().putStringSet(KEY_USERS, current).apply()
+        return added
+    }
+
+    fun removeUser(context: Context, userId: String): Boolean {
+        val id = userId.trim().lowercase()
+        if (id == "manager") return false
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val current = (prefs.getStringSet(KEY_USERS, defaultUsers) ?: defaultUsers).toMutableSet()
+        val removed = current.remove(id)
+
+        current.add("manager")
+        prefs.edit().putStringSet(KEY_USERS, current).apply()
+        return removed
+    }
+}
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/db/CrewSyncDatabase.kt -----
+package com.crewsync.crewsync.db
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+@Database(entities = [Task::class], version = 1, exportSchema = false)
+abstract class CrewSyncDatabase : RoomDatabase() {
+
+    abstract fun taskDao(): TaskDao
+
+    companion object {
+        @Volatile private var INSTANCE: CrewSyncDatabase? = null
+
+        fun getInstance(context: Context): CrewSyncDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    CrewSyncDatabase::class.java,
+                    "crewsync_db"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/db/Task.kt -----
+package com.crewsync.crewsync.db
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "tasks")
+data class Task(
+    @PrimaryKey(autoGenerate = true) val taskId: Int = 0,
+    val eventId: Int,
+    val title: String,
+    val category: String,
+    val dueDateMillis: Long,
+    val isDone: Boolean = false,
+    val createdByUserId: String
+)
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/db/TaskDao.kt -----
+package com.crewsync.crewsync.db
+
+import androidx.lifecycle.LiveData
+import androidx.room.*
+
+@Dao
+interface TaskDao {
+
+    @Insert
+    suspend fun insert(task: Task): Long
+
+    @Update
+    suspend fun update(task: Task)
+
+    // creator-only delete enforced in SQL:
+    @Query("DELETE FROM tasks WHERE taskId = :taskId AND createdByUserId = :userId")
+    suspend fun deleteIfCreator(taskId: Int, userId: String): Int
+
+    @Query("""
+    	SELECT * FROM tasks
+    	WHERE eventId = :eventId
+    	ORDER BY category ASC, dueDateMillis ASC
+    """)
+    fun getTasksForEvent(eventId: Int): LiveData<List<Task>>
+
+    @Query("""
+    	SELECT * FROM tasks
+    	WHERE eventId = :eventId
+    	  AND title LIKE '%' || :query || '%'
+    	  AND (:category = 'All' OR category = :category)
+    	ORDER BY category ASC, dueDateMillis ASC
+    """)
+    fun searchTasks(eventId: Int, query: String, category: String): LiveData<List<Task>>
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE eventId = :eventId")
+    suspend fun countTotal(eventId: Int): Int
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE eventId = :eventId AND isDone = 1")
+    suspend fun countDone(eventId: Int): Int
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/viewmodel/TaskViewModel.kt -----
+package com.crewsync.crewsync.viewmodel
+
+import androidx.lifecycle.*
+import com.crewsync.crewsync.db.Task
+import com.crewsync.crewsync.db.TaskDao
+import kotlinx.coroutines.launch
+
+class TaskViewModel(private val dao: TaskDao) : ViewModel() {
+
+    private val eventIdLive = MutableLiveData<Int>()
+    private val queryLive = MutableLiveData<String>("")
+    private val categoryLive = MutableLiveData<String>("All")
+
+    private var currentSource: LiveData<List<Task>>? = null
+
+    val tasks: LiveData<List<Task>> = MediatorLiveData<List<Task>>().apply {
+        fun update() {
+            val eventId = eventIdLive.value ?: return
+            val q = queryLive.value ?: ""
+            val cat = categoryLive.value ?: "All"
+
+            currentSource?.let { (this as MediatorLiveData).removeSource(it) }
+
+            val source = dao.searchTasks(eventId, q, cat)
+            currentSource = source
+
+            (this as MediatorLiveData).addSource(source) { value = it }
+        }
+
+        addSource(eventIdLive) { update() }
+        addSource(queryLive) { update() }
+        addSource(categoryLive) { update() }
+    }
+
+    fun setEventId(eventId: Int) { eventIdLive.value = eventId }
+    fun setQuery(q: String) { queryLive.value = q }
+    fun setCategory(cat: String) { categoryLive.value = cat }
+
+    fun insert(task: Task) = viewModelScope.launch { dao.insert(task) }
+    fun update(task: Task) = viewModelScope.launch { dao.update(task) }
+
+    fun deleteIfCreator(taskId: Int, userId: String) = viewModelScope.launch {
+        dao.deleteIfCreator(taskId, userId)
+    }
+
+    fun loadProgress(eventId: Int, callback: (done: Int, total: Int) -> Unit) {
+        viewModelScope.launch {
+            val total = dao.countTotal(eventId)
+            val done = dao.countDone(eventId)
+            callback(done, total)
+        }
+    }
+
+    fun insertWithCallback(task: Task, onInserted: (newId: Int) -> Unit) {
+	viewModelScope.launch {
+            val id = dao.insert(task).toInt()
+            onInserted(id)
+    }
+}
+}
+
+
+----- FILE: app/src/main/java/com/crewsync/crewsync/viewmodel/TaskViewModelFactory.kt -----
+package com.crewsync.crewsync.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.crewsync.crewsync.db.TaskDao
+
+class TaskViewModelFactory(private val dao: TaskDao) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(TaskViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return TaskViewModel(dao) as T
+        }
+        throw IllegalArgumentException("Invalid ViewModel")
+    }
+}
+
+
+===== XML LAYOUTS + MENUS =====
+
+----- FILE: app/src/main/res/drawable/ic_launcher_background.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#3DDC84"
+        android:pathData="M0,0h108v108h-108z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M9,0L9,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,0L19,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M29,0L29,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M39,0L39,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M49,0L49,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M59,0L59,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M69,0L69,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M79,0L79,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M89,0L89,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M99,0L99,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,9L108,9"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,19L108,19"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,29L108,29"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,39L108,39"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,49L108,49"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,59L108,59"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,69L108,69"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,79L108,79"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,89L108,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,99L108,99"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,29L89,29"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,39L89,39"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,49L89,49"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,59L89,59"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,69L89,69"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,79L89,79"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M29,19L29,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M39,19L39,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M49,19L49,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M59,19L59,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M69,19L69,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M79,19L79,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+</vector>
+
+----- FILE: app/src/main/res/drawable/ic_launcher_foreground.xml -----
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="85.84757"
+                android:endY="92.4963"
+                android:startX="42.9492"
+                android:startY="49.59793"
+                android:type="linear">
+                <item
+                    android:color="#44000000"
+                    android:offset="0.0" />
+                <item
+                    android:color="#00000000"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="nonZero"
+        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+</vector>
+----- FILE: app/src/main/res/layout/activity_event_detail.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Existing event details -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvMeta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Category • DateTime"
+        android:layout_marginTop="6dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvLocation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Location"
+        android:layout_marginTop="6dp"
+        app:layout_constraintTop_toBottomOf="@id/tvMeta"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvNotes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Notes preview"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tvLocation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Task tools -->
+    <TextView
+        android:id="@+id/tvProgress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Progress: 0%"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/tvNotes"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <EditText
+        android:id="@+id/etSearch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Search tasks by title"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tvProgress"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Spinner
+        android:id="@+id/spCategory"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/etSearch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnAddTask"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Add Task"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/spCategory"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rclTasks"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/btnAddTask"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+----- FILE: app/src/main/res/layout/activity_main.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/main_fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:menu="@menu/bottom_nav_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+----- FILE: app/src/main/res/layout/activity_pin.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="CrewSync Lock"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Enter your PIN"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Spinner
+        android:id="@+id/spUser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <EditText
+        android:id="@+id/etPin"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="4-digit PIN"
+        android:inputType="numberPassword"
+        android:maxLength="6"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/spUser"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnContinue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Continue"
+        android:layout_marginTop="14dp"
+        app:layout_constraintTop_toBottomOf="@id/etPin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+----- FILE: app/src/main/res/layout/activity_task_edit.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/etTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Task title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <EditText
+        android:id="@+id/etCategory"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Category (course)"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/etTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvDue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Due: (tap Set Due Date)"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/etCategory"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnPickDue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Set Due Date/Time"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tvDue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnSaveTask"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:layout_marginTop="14dp"
+        app:layout_constraintTop_toBottomOf="@id/btnPickDue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+----- FILE: app/src/main/res/layout/activity_user_manager.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/etNewUser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="new user id (e.g., alex_01)"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnAddUser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Add User"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/etNewUser"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ListView
+        android:id="@+id/listUsers"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="14dp"
+        app:layout_constraintTop_toBottomOf="@id/btnAddUser"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+----- FILE: app/src/main/res/layout/fragment_calendar.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <CalendarView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</FrameLayout>
+
+
+----- FILE: app/src/main/res/layout/fragment_create.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvCreateTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Create"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvPickEvent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Select event for task:"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/tvCreateTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Spinner
+        android:id="@+id/spEvent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tvPickEvent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnCreateTask"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Create Task"
+        android:layout_marginTop="14dp"
+        app:layout_constraintTop_toBottomOf="@id/spEvent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnCreateEvent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Create Event (placeholder)"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/btnCreateTask"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+----- FILE: app/src/main/res/layout/fragment_dashboard.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp">
+
+    <Spinner
+        android:id="@+id/spUser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rclEvents"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/spUser"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+----- FILE: app/src/main/res/layout/fragment_notifications.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:text="Notifications screen (placeholder)"
+    android:gravity="center"/>
+
+
+----- FILE: app/src/main/res/layout/fragment_settings.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvCurrentUser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Current user:"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnManageUsers"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Manage Users (manager only)"
+        android:layout_marginTop="14dp"
+        app:layout_constraintTop_toBottomOf="@id/tvCurrentUser"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+----- FILE: app/src/main/res/layout/item_event.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <TextView
+        android:id="@+id/tvEventTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Event Title"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvEventMeta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Category • Date/Time"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/tvEventLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location"
+        android:textSize="14sp"
+        android:layout_marginTop="2dp"/>
+
+</LinearLayout>
+----- FILE: app/src/main/res/layout/item_task.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp">
+
+    <CheckBox
+        android:id="@+id/cbDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvTaskTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Task title"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/cbDone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnDelete"
+        android:layout_marginStart="8dp"/>
+
+    <TextView
+        android:id="@+id/tvTaskMeta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Category • Due"
+        app:layout_constraintStart_toStartOf="@id/tvTaskTitle"
+        app:layout_constraintTop_toBottomOf="@id/tvTaskTitle"
+        app:layout_constraintEnd_toStartOf="@id/btnDelete"
+        android:layout_marginTop="4dp"/>
+
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+----- FILE: app/src/main/res/menu/bottom_nav_menu.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_dashboard"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="Dashboard" />
+
+    <item
+        android:id="@+id/nav_calendar"
+        android:icon="@android:drawable/ic_menu_my_calendar"
+        android:title="Calendar" />
+
+    <item
+        android:id="@+id/nav_create"
+        android:icon="@android:drawable/ic_input_add"
+        android:title="Create" />
+
+    <item
+        android:id="@+id/nav_notifications"
+        android:icon="@android:drawable/ic_dialog_info"
+        android:title="Notifications" />
+
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="Settings" />
+
+</menu>
+
+----- FILE: app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
+----- FILE: app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
+----- FILE: app/src/main/res/values-night/themes.xml -----
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    </style>
+</resources>
+----- FILE: app/src/main/res/values/colors.xml -----
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
+----- FILE: app/src/main/res/values/strings.xml -----
+<resources>
+    <string name="app_name">My Application</string>
+</resources>
+----- FILE: app/src/main/res/values/themes.xml -----
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
+</resources>
+----- FILE: app/src/main/res/xml/backup_rules.xml -----
+<?xml version="1.0" encoding="utf-8"?><!--
+   Sample backup rules file; uncomment and customize as necessary.
+   See https://developer.android.com/guide/topics/data/autobackup
+   for details.
+   Note: This file is ignored for devices older than API 31
+   See https://developer.android.com/about/versions/12/backup-restore
+-->
+<full-backup-content>
+    <!--
+   <include domain="sharedpref" path="."/>
+   <exclude domain="sharedpref" path="device.xml"/>
+-->
+</full-backup-content>
+----- FILE: app/src/main/res/xml/data_extraction_rules.xml -----
+<?xml version="1.0" encoding="utf-8"?><!--
+   Sample data extraction rules file; uncomment and customize as necessary.
+   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
+   for details.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- TODO: Use <include> and <exclude> to control what is backed up.
+        <include .../>
+        <exclude .../>
+        -->
+    </cloud-backup>
+    <!--
+    <device-transfer>
+        <include .../>
+        <exclude .../>
+    </device-transfer>
+    -->
+</data-extraction-rules>
+===== QUICK GREPS (sanity) =====
+-- namespace/applicationId --
+7:    namespace = "com.crewsync.crewsync"
+13:        applicationId = "com.lrhernandez.crewsync"
+
+-- Room annotations --
+
+-- Alarm/Notifications --
+
+-- Bottom nav IDs --
+

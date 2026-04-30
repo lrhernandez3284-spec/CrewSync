@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.crewsync.crewsync.db.CrewSyncDatabase
 
 class UserManagerActivity : AppCompatActivity() {
 
@@ -67,6 +70,10 @@ class UserManagerActivity : AppCompatActivity() {
                         1 -> {
                             UserStore.removeUser(this, userId)
                             PinPrefs.resetPin(this, userId)
+                            val dao = CrewSyncDatabase.getInstance(this).taskDao()
+                            lifecycleScope.launch {
+                                dao.deleteAssignmentsForUser(userId)
+                            }
                             Toast.makeText(this, "Deleted $userId", Toast.LENGTH_SHORT).show()
                             refresh()
                         }

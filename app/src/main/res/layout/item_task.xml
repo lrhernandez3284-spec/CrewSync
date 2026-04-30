@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/taskRowRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="12dp">
@@ -10,6 +11,7 @@
         android:id="@+id/cbDone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text=""
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -19,28 +21,41 @@
         android:layout_height="wrap_content"
         android:text="Task title"
         android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintStart_toEndOf="@id/cbDone"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnDelete"
-        android:layout_marginStart="8dp"/>
+        app:layout_constraintEnd_toStartOf="@id/btnEdit"/>
 
     <TextView
         android:id="@+id/tvTaskMeta"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Category • Due"
-        app:layout_constraintStart_toStartOf="@id/tvTaskTitle"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintStart_toEndOf="@id/cbDone"
         app:layout_constraintTop_toBottomOf="@id/tvTaskTitle"
-        app:layout_constraintEnd_toStartOf="@id/btnDelete"
-        android:layout_marginTop="4dp"/>
+        app:layout_constraintEnd_toStartOf="@id/btnEdit"/>
+
+    <Button
+        android:id="@+id/btnEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnDelete"/>
 
     <Button
         android:id="@+id/btnDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Delete"
+        android:layout_marginStart="6dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

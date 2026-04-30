@@ -5,7 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Task::class], version = 1, exportSchema = false)
+@Database(
+    entities = [Task::class, TaskAssignment::class],
+    version = 2,
+    exportSchema = false
+)
 abstract class CrewSyncDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao
@@ -19,11 +23,14 @@ abstract class CrewSyncDatabase : RoomDatabase() {
                     context.applicationContext,
                     CrewSyncDatabase::class.java,
                     "crewsync_db"
-                ).build()
+                )
+                    // dev-friendly: nukes old schema instead of migrations
+                    .fallbackToDestructiveMigration()
+                    .build()
+
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
-

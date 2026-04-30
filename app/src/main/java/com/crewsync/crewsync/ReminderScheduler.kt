@@ -30,7 +30,7 @@ object ReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAt, pending)
     }
 
     fun cancel(context: Context, taskId: Int) {
