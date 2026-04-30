@@ -12,19 +12,28 @@ import androidx.fragment.app.Fragment
 import com.crewsync.crewsync.R
 import com.crewsync.crewsync.UserManagerActivity
 import com.crewsync.crewsync.UserPrefs
+import com.crewsync.crewsync.UserProfileActivity
+import com.crewsync.crewsync.UserStore
 
 class SettingsFragment : Fragment() {
+
+    private lateinit var tv: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
 
-        val tv = view.findViewById<TextView>(R.id.tvCurrentUser)
-        val btn = view.findViewById<Button>(R.id.btnManageUsers)
+        tv = view.findViewById(R.id.tvCurrentUser)
+        val btnEditProfile = view.findViewById<Button>(R.id.btnEditProfile)
+        val btnManageUsers = view.findViewById<Button>(R.id.btnManageUsers)
 
-        val current = UserPrefs.getCurrentUserId(requireContext())
-        tv.text = "Current user: $current"
+        refreshCurrentUserText()
 
-        btn.setOnClickListener {
+        btnEditProfile.setOnClickListener {
+            startActivity(Intent(requireContext(), UserProfileActivity::class.java))
+        }
+
+        btnManageUsers.setOnClickListener {
+            val current = UserPrefs.getCurrentUserId(requireContext())
             if (current != "manager") {
                 Toast.makeText(requireContext(), "Manager only", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -34,5 +43,17 @@ class SettingsFragment : Fragment() {
 
         return view
     }
-}
 
+    override fun onResume() {
+        super.onResume()
+        if (this::tv.isInitialized) {
+            refreshCurrentUserText()
+        }
+    }
+
+    private fun refreshCurrentUserText() {
+        val current = UserPrefs.getCurrentUserId(requireContext())
+        val display = UserStore.getDisplayName(requireContext(), current)
+        tv.text = "Current user: $display ($current)"
+    }
+}

@@ -53,7 +53,8 @@ class TaskEditActivity : AppCompatActivity() {
         tvDue.text = "Due: ${formatDue(dueMillis)}"
 
         val users = UserStore.getUsers(this).filter { it != "manager" }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, users)
+        val userLabels = users.map { UserStore.getUserLabel(this, it) }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, userLabels)
         listUsers.adapter = adapter
         listUsers.choiceMode = ListView.CHOICE_MODE_MULTIPLE
 

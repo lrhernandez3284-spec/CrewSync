@@ -70,10 +70,23 @@ interface TaskDao {
     // ---------------- ASSIGNMENTS (join table) ----------------
 
     @Insert
+    suspend fun insertAssignment(row: TaskAssignment)
+
+    @Insert
     suspend fun insertAssignments(list: List<TaskAssignment>)
 
     @Query("DELETE FROM task_assignments WHERE taskId = :taskId")
     suspend fun deleteAssignmentsForTask(taskId: Int)
+
+    @Query("""
+        SELECT taskId FROM task_assignments
+        WHERE userId = :userId
+          AND taskId NOT IN (
+              SELECT taskId FROM task_assignments
+              WHERE userId != :userId
+          )
+    """)
+    suspend fun getTaskIdsOnlyAssignedToUser(userId: String): List<Int>
 
     @Query("DELETE FROM task_assignments WHERE userId = :userId")
     suspend fun deleteAssignmentsForUser(userId: String)

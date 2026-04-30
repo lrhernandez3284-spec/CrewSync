@@ -51,7 +51,8 @@ class TaskAdapter(
         val isOverdue = !t.isDone && t.dueDateMillis < System.currentTimeMillis()
         val overdueTag = if (isOverdue) " • OVERDUE" else ""
 
-        holder.tvMeta.text = "${t.category} • Created by ${t.createdByUserId} • Due $due$overdueTag"
+        val creatorName = UserStore.getDisplayName(holder.itemView.context, t.createdByUserId)
+        holder.tvMeta.text = "${t.category} • Created by $creatorName • Due $due$overdueTag"
 
         // checkbox
         holder.cbDone.setOnCheckedChangeListener(null)

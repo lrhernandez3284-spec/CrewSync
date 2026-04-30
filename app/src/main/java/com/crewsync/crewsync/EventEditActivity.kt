@@ -48,7 +48,8 @@ class EventEditActivity : AppCompatActivity() {
         }
 
         val users = UserStore.getUsers(this).filter { it != "manager" }
-        val userAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, users)
+        val userLabels = users.map { UserStore.getUserLabel(this, it) }
+        val userAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, userLabels)
         listUsers.adapter = userAdapter
         listUsers.choiceMode = ListView.CHOICE_MODE_MULTIPLE
 

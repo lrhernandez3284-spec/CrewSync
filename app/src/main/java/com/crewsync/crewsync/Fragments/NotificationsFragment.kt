@@ -72,8 +72,16 @@ class NotificationsFragment : Fragment() {
             }
         }
 
+        val actorName = UserStore.getDisplayName(requireContext(), item.actorUserId)
+        val displayMessage =
+            if (item.message.startsWith(item.actorUserId)) {
+                actorName + item.message.removePrefix(item.actorUserId)
+            } else {
+                item.message
+            }
+
         val message = TextView(requireContext()).apply {
-            text = item.message
+            text = displayMessage
             textSize = 16f
             typeface = Typeface.DEFAULT_BOLD
         }
