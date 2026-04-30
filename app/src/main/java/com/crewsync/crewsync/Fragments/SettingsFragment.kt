@@ -28,6 +28,9 @@ class SettingsFragment : Fragment() {
 
         refreshCurrentUserText()
 
+        val currentUser = UserPrefs.getCurrentUserId(requireContext())
+        btnManageUsers.visibility = if (currentUser == "manager") View.VISIBLE else View.GONE
+
         btnEditProfile.setOnClickListener {
             startActivity(Intent(requireContext(), UserProfileActivity::class.java))
         }
